@@ -1,4 +1,4 @@
-import instance from '@g/api'
+/* import instance from '@g/api'
 
 async function loginUser(data) {
   console.log(data)
@@ -32,4 +32,4 @@ export{
   loginUser,
   verifyToken,
   codeV
-}
+} */

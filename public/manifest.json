@@ -1,4 +1,8 @@
 {
+  "name": "Multishop KPI",
+  "short_name": "Multishop KPI",
+  "description": "This is a PWA powered by multishop",
+  "start_url": "/",
   "theme_color": "#f5f5f5",
   "background_color": "#ffff",
   "icons": [
@@ -15,12 +19,8 @@
       "type": "image/png"
     }
   ],
-  "orientation": "any",
+  "orientation": "portrait", 
   "display": "standalone",
   "dir": "auto",
-  "lang": "en-US",
-  "name": "Multishop KPI APP2",
-  "short_name": "Multishop-app2",
-  "description": "This is a PWA powered by multishop",
-  "start_url": "/"
+  "lang": "en-US"
 }
