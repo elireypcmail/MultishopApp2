@@ -3,12 +3,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
+    padding-top: 1.8rem;
     
     .graph__body{
       display: flex;
       flex-direction: column;
       width: 94%;
-      height: 87vh;
+      height: 83vh;
       padding: 10px 7px 5px 7px;
       background: rgba(238, 238, 238, 0.71);
       border: 1px solid rgba(0, 0, 0, 0.14);

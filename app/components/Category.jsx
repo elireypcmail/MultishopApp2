@@ -1,27 +1,35 @@
-import { useState } from 'react'
-import {
-  Financial,
-  Operative,
-  Statiscal,
-  ArrowRight,
-  ArrowDown
-} from './Icons'
+import { useState, useEffect } from 'react'
+import { Financial, Operative, Statiscal, ArrowRight, ArrowDown, Sun, Moon } from './Icons'
 import Image from 'next/image'
 import multishop from '@p/Logo Sistema Multishop Pequeno.png'
 import FooterGraph from './Footer'
-import Modal from './Modal' 
+import Modal from './Modal'
 import GraphTypeModal from './GraphType'
 
 export default function Category() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
   const [isGraphTypeModalOpen, setIsGraphTypeModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [selectedGraph, setSelectedGraph] = useState(null) 
-  const [selectedGraphType, setSelectedGraphType] = useState(null) 
+  const [selectedGraph, setSelectedGraph] = useState(null)
+  const [selectedGraphType, setSelectedGraphType] = useState(null)
+  const [darkMode, setDarkMode] = useState(false)
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [darkMode])
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode)
+  }
 
   const handleCategoryClick = (category) => {
     setSelectedCategory(category)
     setIsCategoryModalOpen(true)
+    console.log('Category clicked:', category)
   }
 
   const handleGraphTypeClick = () => {
@@ -38,17 +46,27 @@ export default function Category() {
 
   const handleSaveGraphs = (graph) => {
     setSelectedGraph(graph)
-    console.log('Gráfico seleccionado:', graph)
+    console.log('Graph saved:', graph)
   }
 
   const handleSaveGraphType = (graphType) => {
     setSelectedGraphType(graphType)
-    console.log('Tipo de gráfico seleccionado:', graphType)
+    console.log('Graph type saved:', graphType)
   }
+
+  console.log('selectedGraph before Modal render:', selectedGraph)
 
   return (
     <div className="body">
       <div className="calendar">
+        <div className="mood">
+          <button className={`mood-btn ${darkMode ? 'dark' : ''}`} onClick={toggleDarkMode}>
+            <Sun className="icon" />
+            <div className="circle2"></div>
+            <Moon className="icon" />
+          </button>
+        </div>
+
         <div className="container-ca">
           <div className="title-ca">
             <h1>Selecciona la categoría</h1>
@@ -100,7 +118,7 @@ export default function Category() {
           category={selectedCategory}
           onClose={handleCloseCategoryModal}
           onSave={handleSaveGraphs}
-          selectedGraph={selectedGraph} 
+          selectedGraph={selectedGraph}
         />
       )}
 
@@ -108,7 +126,7 @@ export default function Category() {
         <GraphTypeModal
           onClose={handleCloseGraphTypeModal}
           onSave={handleSaveGraphType}
-          selectedGraphType={selectedGraphType} 
+          selectedGraphType={selectedGraphType}
         />
       )}
     </div>

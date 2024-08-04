@@ -1,23 +1,64 @@
 import "react-day-picker/dist/style.css"
-import React, { useState } from "react"
-import { addDays }         from "date-fns"
-import { DayPicker }       from "react-day-picker"
-import multishop           from '@p/Logo Sistema Multishop Pequeno.png'
-import Image               from "next/image"
-import { ArrowRight}       from "./Icons"
-import FooterGraph         from './Footer'
+import React, { useState, useEffect } from "react"
+import { ArrowRight, Sun, Moon }      from "./Icons"
+import { addDays }   from "date-fns"
+import { DayPicker } from "react-day-picker"
+import multishop     from '@p/Logo Sistema Multishop Pequeno.png'
+import Image         from "next/image"
+import FooterGraph   from './Footer'
+import Router        from "next/router"
 
 export default function DateComponent() {
-  const initialRange = {
+  const [darkMode, setDarkMode] = useState(false)
+  const [range, setRange] = useState({
     from: new Date(),
     to: addDays(new Date(), 4),
+  })
+
+  const { push } = Router
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [darkMode])
+
+  useEffect(() => {
+    const savedRange = localStorage.getItem('dateRange')
+    if (savedRange) {
+      const parsedRange = JSON.parse(savedRange)
+      setRange({
+        from: new Date(parsedRange.from),
+        to: new Date(parsedRange.to),
+      })
+    }
+  }, [])
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode)
   }
 
-  const [range, setRange] = useState(initialRange)
+  const handleNext = () => {
+    localStorage.setItem('dateRange', JSON.stringify({
+      from: range.from.toISOString(),
+      to: range.to.toISOString(),
+    }))
+    
+    push('/category')
+  }
 
   return (
     <div className="body">
       <div className="calendar">
+        <div className="mood">
+          <button className={`mood-btn ${darkMode ? 'dark' : ''}`} onClick={toggleDarkMode}>
+            <Sun className="icon" />
+            <div className="circle2"></div>
+            <Moon className="icon" />
+          </button>
+        </div>
         <div className="title-calendar">
           <h1>Selecciona el rango de fecha</h1>
         </div>
@@ -34,12 +75,11 @@ export default function DateComponent() {
           <div className="logo-small">
             <Image src={multishop} className="mutishop" alt="Logo de Multishop" />
           </div>
-          <div className="button-calendar">
+          <div className="button-calendar" onClick={handleNext}>
             <span>Siguiente</span>
             <ArrowRight />
           </div>
         </div>
-
         <FooterGraph />
       </div>
     </div>

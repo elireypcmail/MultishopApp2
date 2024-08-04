@@ -1,6 +1,6 @@
 @media (max-width: 767px) {
   .body {
-    background-image: url('../public/fondo.png');
+    background-image: url('../public/fondo.jpeg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -29,8 +29,8 @@
         border-radius: 20px;
         background: rgba(238, 238, 238, 0.17);
         backdrop-filter: blur(5px);
-        padding: 1rem;  /* Añadir padding para asegurar que el contenido no toque los bordes */
-        box-sizing: border-box;  /* Asegura que el padding se incluya en el tamaño total del elemento */
+        padding: 1rem;  
+        box-sizing: border-box;  
       }
     
       .modal-verify {

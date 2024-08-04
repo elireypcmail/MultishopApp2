@@ -12,7 +12,12 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphType }) => {
   ]
 
   useEffect(() => {
-    setCurrentSelectedGraphType(selectedGraphType)
+    const savedGraphType = localStorage.getItem('selectedGraphType')
+    if (savedGraphType) {
+      setCurrentSelectedGraphType(savedGraphType)
+    } else {
+      setCurrentSelectedGraphType(selectedGraphType)
+    }
   }, [selectedGraphType])
 
   const handleItemClick = (graphType) => {
@@ -24,11 +29,13 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphType }) => {
     setTimeout(() => {
       onClose()
       setClosing(false)
-    }, 300) 
+    }, 300)
   }
 
   const handleSave = () => {
+    console.log('Saving currentSelectedGraphType:', currentSelectedGraphType)
     onSave(currentSelectedGraphType)
+    localStorage.setItem('selectedGraphType', currentSelectedGraphType)
     handleClose()
   }
 
