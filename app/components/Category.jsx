@@ -1,10 +1,23 @@
 import { useState, useEffect } from 'react'
-import { Financial, Operative, Statiscal, ArrowRight, ArrowDown, Sun, Moon } from './Icons'
+import { 
+  Financial, 
+  Operative, 
+  Statistical, 
+  ArrowRight, 
+  ArrowDown, 
+  Sun, 
+  Moon 
+} from './Icons'
 import Image from 'next/image'
+import { useRouter } from 'next/router'
 import multishop from '@p/Logo Sistema Multishop Pequeno.png'
 import FooterGraph from './Footer'
 import Modal from './Modal'
 import GraphTypeModal from './GraphType'
+import instance from '@g/api' 
+import BarChartComponent from './BarChart'
+import LineChartComponent from './AreaChart'
+import PieChartComponent from './PieChart'
 
 export default function Category() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -13,6 +26,10 @@ export default function Category() {
   const [selectedGraph, setSelectedGraph] = useState(null)
   const [selectedGraphType, setSelectedGraphType] = useState(null)
   const [darkMode, setDarkMode] = useState(false)
+  const [chartData, setChartData] = useState([])
+  const [isDataFetched, setIsDataFetched] = useState(false)
+
+  const router = useRouter()
 
   useEffect(() => {
     if (darkMode) {
@@ -21,6 +38,21 @@ export default function Category() {
       document.documentElement.classList.remove('dark')
     }
   }, [darkMode])
+
+  useEffect(() => {
+    if (isDataFetched && chartData.length > 0) {
+      console.log(JSON.stringify(chartData));
+      
+      router.push({
+        pathname: '/graph',
+        query: {
+          selectedGraph,
+          selectedGraphType,
+          chartData: JSON.stringify(chartData),
+        },
+      })
+    }
+  }, [isDataFetched, chartData, router, selectedGraph, selectedGraphType])
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
@@ -54,7 +86,31 @@ export default function Category() {
     console.log('Graph type saved:', graphType)
   }
 
-  console.log('selectedGraph before Modal render:', selectedGraph)
+  const handleFetchChartData = async () => {
+    const dateRange = JSON.parse(localStorage.getItem('dateRange'))
+    const { from, to } = dateRange
+
+    try {
+      const response = await instance.post('/filter-data', {
+        nombreCliente: 'yender',
+        nombreTabla: 'ventas',
+        fechaInicio: from,
+        fechaFin: to,
+        kpi: selectedGraph,
+      })
+
+      setChartData(response.data)
+      setIsDataFetched(true)  // Set flag to true when data is fetched
+      console.log(response.data)  // Log the fetched data
+
+    } catch (error) {
+      console.error('Error fetching chart data:', error)
+    }
+  }
+
+  const handleSearchGraph = async () => {
+    await handleFetchChartData()
+  }
 
   return (
     <div className="body">
@@ -82,7 +138,7 @@ export default function Category() {
               <span className='ca-ti'>Análisis Operativo</span>
             </div>
             <div className="categoria" onClick={() => handleCategoryClick('statistical')}>
-              <Statiscal />
+              <Statistical />
               <span className='ca-ti'>Análisis Estadístico</span>
             </div>
           </div>
@@ -104,7 +160,7 @@ export default function Category() {
           <div className="logo-small">
             <Image src={multishop} className="mutishop" alt="Logo de Multishop" />
           </div>
-          <div className="button-calendar">
+          <div className="button-calendar" onClick={handleSearchGraph}>
             <span>Buscar gráfico</span>
             <ArrowRight />
           </div>

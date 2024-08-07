@@ -1,10 +1,16 @@
-import FooterGraph from './Footer'
-import ComponentGraph from './GraphSelect'
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
+import FooterGraph from './Footer'
+import BarChartComponent from './BarChart'
+import PieChartComponent from './PieChart'
+import LineChartComponent from './AreaChart'
 import { Sun, Moon } from './Icons'
 
 export default function Graph() {
+  const router = useRouter()
+  const { selectedGraph, selectedGraphType, chartData } = router.query
   const [darkMode, setDarkMode] = useState(false)
+  const [chartDataState, setChartDataState] = useState([])
 
   useEffect(() => {
     if (darkMode) {
@@ -14,11 +20,35 @@ export default function Graph() {
     }
   }, [darkMode])
 
+  useEffect(() => {
+    if (chartData) {
+      try {
+        const parsedData = JSON.parse(chartData)
+        setChartDataState(parsedData)
+      } catch (error) {
+        console.error('Error parsing chart data:', error)
+      }
+    }
+  }, [chartData])
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
   }
 
-  return(
+  const renderChart = () => {
+    switch (selectedGraphType) {
+      case 'Barra':
+        return <BarChartComponent data={chartDataState} />
+      case 'Torta':
+        return <PieChartComponent data={chartDataState} />
+      case 'Línea':
+        return <LineChartComponent data={chartDataState} />
+      default:
+        return <div>No se ha seleccionado ningún tipo de gráfico.</div>
+    }
+  }
+
+  return (
     <div className="body">
       <div className="calendar gra-content">
         <div className="mood">
@@ -31,15 +61,14 @@ export default function Graph() {
 
         <div className="graph__body">
           <div className="graph__header">
-            <div className="graph__header__title">Graph</div>
+            <div className="graph__header__title">{selectedGraphType} Chart</div>
             <div className="graph__header__data">
-              <span>Dato1: 10</span>
-              <span>Dato2: 20</span>
-              <span>Dato3: 30</span>
+              <span>{selectedGraph}</span>
+              <span>January - June 2024</span>
             </div>
           </div>
           <div className="graph__body__content">
-            <ComponentGraph />
+            {renderChart()}
           </div>
         </div>
 

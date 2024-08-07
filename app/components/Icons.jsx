@@ -651,7 +651,7 @@ const Operative = () => {
   )
 }
 
-const Statiscal = () => {
+const Statistical = () => {
   return(
     <svg
       xmlns="http://www.w3.org/2000/svg" 
@@ -819,7 +819,7 @@ export {
   Logout,
   Financial,
   Operative,
-  Statiscal,
+  Statistical,
   ArrowDown,
   CircularGraph,
   BarGraph,

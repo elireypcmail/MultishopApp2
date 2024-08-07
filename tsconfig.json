@@ -27,7 +27,7 @@
         "./components/ui/*"
       ],
       "@g/*": [
-        "./app/global/*"
+        "./app/globals/*"
       ],
       "@s/*": [
         "./styles/*"

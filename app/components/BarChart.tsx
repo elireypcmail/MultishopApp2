@@ -17,23 +17,25 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@comp/chart"
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-]
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Venta",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig
 
-export function Component() {
+export default function BarChartComponent({ data } : { data: { periodo: string, total_valor: number }[] }) {
+  console.log(data);
+
+  const formattedData = data.map(item => ({
+    month: item.periodo,
+    total: parseFloat(item.total_valor.toString()), // Ensure this is a number
+  }))
+
+  console.log(formattedData)
+  
+  
   return (
     <Card>
       <CardHeader>
@@ -44,7 +46,7 @@ export function Component() {
         <ChartContainer config={chartConfig}>
           <BarChart
             accessibilityLayer
-            data={chartData}
+            data={formattedData}
             margin={{
               top: 20,
             }}
@@ -61,7 +63,7 @@ export function Component() {
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="desktop" fill="var(--color-desktop)" radius={8}>
+            <Bar dataKey="total" fill="var(--color-desktop)" radius={8}>
               <LabelList
                 position="top"
                 offset={12}
