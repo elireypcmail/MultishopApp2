@@ -13,6 +13,11 @@ export default function Graph() {
   const [chartDataState, setChartDataState] = useState([])
 
   useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
+    setDarkMode(savedDarkMode)
+  }, [])
+
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {
@@ -32,7 +37,9 @@ export default function Graph() {
   }, [chartData])
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
+    const newDarkMode = !darkMode
+    setDarkMode(newDarkMode)
+    localStorage.setItem('darkMode', newDarkMode)
   }
 
   const renderChart = () => {

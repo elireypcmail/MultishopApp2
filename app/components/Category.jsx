@@ -14,7 +14,7 @@ import multishop from '@p/Logo Sistema Multishop Pequeno.png'
 import FooterGraph from './Footer'
 import Modal from './Modal'
 import GraphTypeModal from './GraphType'
-import instance from '@g/api' 
+import instance from '@g/api'
 import BarChartComponent from './BarChart'
 import LineChartComponent from './AreaChart'
 import PieChartComponent from './PieChart'
@@ -32,6 +32,13 @@ export default function Category() {
   const router = useRouter()
 
   useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode")
+    if (savedDarkMode !== null) {
+      setDarkMode(JSON.parse(savedDarkMode))
+    }
+  }, [])
+
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {
@@ -41,7 +48,7 @@ export default function Category() {
 
   useEffect(() => {
     if (isDataFetched && chartData.length > 0) {
-      console.log(JSON.stringify(chartData));
+      console.log(JSON.stringify(chartData))
       
       router.push({
         pathname: '/graph',
@@ -55,7 +62,9 @@ export default function Category() {
   }, [isDataFetched, chartData, router, selectedGraph, selectedGraphType])
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
+    const newMode = !darkMode
+    setDarkMode(newMode)
+    localStorage.setItem("darkMode", JSON.stringify(newMode))
   }
 
   const handleCategoryClick = (category) => {
