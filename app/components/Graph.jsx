@@ -4,7 +4,7 @@ import FooterGraph from './Footer'
 import BarChartComponent from './BarChart'
 import PieChartComponent from './PieChart'
 import LineChartComponent from './AreaChart'
-import { Sun, Moon } from './Icons'
+import { Sun, Moon, NotFound } from './Icons'
 
 export default function Graph() {
   const router = useRouter()
@@ -51,7 +51,14 @@ export default function Graph() {
       case 'Línea':
         return <LineChartComponent data={chartDataState} />
       default:
-        return <div>No se ha seleccionado ningún tipo de gráfico.</div>
+        return <div className='not-found'>
+          <div className="icon-not-found">
+            <NotFound />
+          </div>
+          <span>
+            No se ha seleccionado ningún tipo de gráfico.
+          </span>
+        </div>
     }
   }
 
