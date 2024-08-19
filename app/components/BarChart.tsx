@@ -1,16 +1,8 @@
-"use client"
-
+import { useEffect, useState } from "react"
 import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis } from "recharts"
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@comp/card"
+import { Card, CardContent, CardFooter } from "@comp/card"
 import {
   ChartConfig,
   ChartContainer,
@@ -25,23 +17,23 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export default function BarChartComponent({ data } : { data: { periodo: string, total_valor: number }[] }) {
-  console.log(data);
+export default function BarChartComponent({ data } : { data: { periodo: string, total_valor: number, promedio_valor: number }[] }) {
+  const [selectedGraph, setSelectedGraph] = useState('')
+  
+  useEffect(() => {
+    const graphName = localStorage.getItem('selectedGraphName')
+    setSelectedGraph(graphName || '')
+  }, [])
+
+  const dataKey = selectedGraph.startsWith("Promedio") ? "promedio_valor" : "total_valor"
 
   const formattedData = data.map(item => ({
     month: item.periodo,
-    total: parseFloat(item.total_valor.toString()), // Ensure this is a number
+    value: parseFloat(item[dataKey].toString()), 
   }))
-
-  console.log(formattedData)
-  
   
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Bar Chart - Label</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
@@ -63,7 +55,7 @@ export default function BarChartComponent({ data } : { data: { periodo: string, 
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="total" fill="var(--color-desktop)" radius={8}>
+            <Bar dataKey="value" fill="var(--color-desktop)" radius={8}>
               <LabelList
                 position="top"
                 offset={12}

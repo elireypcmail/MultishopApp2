@@ -101,7 +101,7 @@ export default function Category() {
 
     try {
       const response = await instance.post('/filter-data', {
-        nombreCliente: 'yender',
+        nombreCliente: 'prueba',
         nombreTabla: 'ventas',
         fechaInicio: from,
         fechaFin: to,
@@ -109,15 +109,16 @@ export default function Category() {
       })
 
       setChartData(response.data)
-      setIsDataFetched(true)  // Set flag to true when data is fetched
-      console.log(response.data)  // Log the fetched data
+      setIsDataFetched(true)
+      console.log(response.data)
 
     } catch (error) {
       console.error('Error fetching chart data:', error)
     }
   }
 
-  const handleSearchGraph = async () => {
+  const handleSearchGraph = async (e) => {
+    e.preventDefault()
     await handleFetchChartData()
   }
 

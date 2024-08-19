@@ -11,6 +11,8 @@ export default function Graph() {
   const { selectedGraph, selectedGraphType, chartData } = router.query
   const [darkMode, setDarkMode] = useState(false)
   const [chartDataState, setChartDataState] = useState([])
+  const [nameGraph, setNameGraph] = useState('')
+  const [dateGraph, setDateGraph] = useState('')
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true'
@@ -26,6 +28,7 @@ export default function Graph() {
   }, [darkMode])
 
   useEffect(() => {
+    loadName()
     if (chartData) {
       try {
         const parsedData = JSON.parse(chartData)
@@ -34,12 +37,24 @@ export default function Graph() {
         console.error('Error parsing chart data:', error)
       }
     }
-  }, [chartData])
+  }, [chartData, nameGraph])
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode
     setDarkMode(newDarkMode)
     localStorage.setItem('darkMode', newDarkMode)
+  }
+
+  const loadName = () => {
+    const res = localStorage.getItem('selectedGraphName')
+    const date = JSON.parse(localStorage.getItem('dateRange'))
+    if (date) {
+      const from = new Date(date.from).toLocaleDateString('en-CA')
+      const to = new Date(date.to).toLocaleDateString('en-CA')
+
+      setNameGraph(res)
+      setDateGraph(`${from} / ${to}`)
+    }
   }
 
   const renderChart = () => {
@@ -75,11 +90,14 @@ export default function Graph() {
 
         <div className="graph__body">
           <div className="graph__header">
-            <div className="graph__header__title">{selectedGraphType} Chart</div>
-            <div className="graph__header__data">
-              <span>{selectedGraph}</span>
-              <span>January - June 2024</span>
-            </div>
+            {selectedGraphType ? (
+              <>
+                <div className="graph__header__title">{nameGraph}</div>
+                <div className="graph__header__data">
+                  <span>{dateGraph}</span>
+                </div>
+              </>
+            ) : null}
           </div>
           <div className="graph__body__content">
             {renderChart()}

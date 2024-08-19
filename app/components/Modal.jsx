@@ -3,47 +3,48 @@ import { CloseModal } from './Icons'
 
 const Modal = ({ category, onClose, onSave, selectedGraph }) => {
   const [currentSelectedGraph, setCurrentSelectedGraph] = useState(selectedGraph)
+  const [nameSelectedGraph, setNameSelectedGraph] = useState('')
   const [closing, setClosing] = useState(false)
 
   const getGraphs = () => {
     switch (category) {
       case 'financial':
         return [
-          { name: 'Totales Generales de Venta', value: 'totalventa' },
-          { name: 'Promedio Diario de Venta', value: 'promdiarioventa' },
-          { name: 'Totales Generales de Utilidad', value: 'totalut' },
-          { name: 'Promedio Diario de Utilidad', value: 'promdiarioutilidad' },
-          { name: 'Totales Generales de Valor Ticket de Venta', value: 'valor_tp' },
-          { name: 'Promedio Diario de Valor Ticket de Venta', value: 'promdiariovalorticket' },
-          { name: 'Totales Generales de Costos de Venta', value: 'totalcosto' },
-          { name: 'Promedio Diario de Costos de Venta', value: 'promdiariocosto' },
-          { name: 'Totales Generales de Porcentaje de Utilidad', value: 'porcentajedeutilidad' },
-          { name: 'Promedio Diario de Porcentaje de Utilidad', value: 'promdiarioporcentajedeutilidad' },
-          { name: 'Promedio Diario de Margen de Ganancia', value: 'margendeldia' },
+          { name: 'Totales Generales de Venta', value: 'total_totalventa' },
+          { name: 'Promedio Diario de Venta', value: 'promedio_totalventa' },
+          { name: 'Totales Generales de Utilidad', value: 'total_totalut' },
+          { name: 'Promedio Diario de Utilidad', value: 'promedio_totalut' },
+          { name: 'Totales Generales de Valor Ticket de Venta', value: 'total_valor_tp' },
+          { name: 'Promedio Diario de Valor Ticket de Venta', value: 'promedio_valor_tp' },
+          { name: 'Totales Generales de Costos de Venta', value: 'total_totalcosto' },
+          { name: 'Promedio Diario de Costos de Venta', value: 'promedio_totalcosto' },
+          { name: 'Totales Generales de Porcentaje de Utilidad', value: 'total_porcentajedeutilidad' },
+          { name: 'Promedio Diario de Porcentaje de Utilidad', value: 'promedio_porcentajedeutilidad' },
+          { name: 'Promedio Diario de Margen de Ganancia', value: 'promedio_margendeldia' },
         ];
       case 'operative':
         return [
-          { name: 'Totales Generales de Unidades Vendidas', value: 'cantidadund' },
-          { name: 'Promedio Diario de Unidades Vendidas', value: 'promdiariounidvend' },
-          { name: 'Totales Generales de Facturas Emitidas', value: 'cantidadfac' },
-          { name: 'Promedio Diario de Facturas Emitidas', value: 'promdiariofactemit' },
-          { name: 'Totales Generales de Unidades en Bolsa', value: 'valor_uxb' },
-          { name: 'Promedio Diario de Unidades en Bolsa', value: 'promdiariounidbolsa' },
-          { name: 'Totales Generales de Valor Promedio de la Unidad', value: 'valor_up' },
-          { name: 'Promedio Diario de Valor Promedio de la Unidad', value: 'promdiariovalorup' },
-          { name: 'Totales Generales de Clientes Atendidos', value: 'clientesa' },
-          { name: 'Promedio Diario de Clientes Atendidos', value: 'promdiarioclientesat' },
-          { name: 'Totales Generales de Clientes Frecuentes', value: 'clientesf' },
-          { name: 'Promedio Diario de Clientes Frecuentes', value: 'promdiarioclientesfrec' },
-          { name: 'Totales Generales de Clientes Nuevos', value: 'clientesn' },
-          { name: 'Promedio Diario de Clientes Nuevos', value: 'promdiarioclientesnuev' },
+          { name: 'Totales Generales de Unidades Vendidas', value: 'total_cantidadund' },
+          { name: 'Promedio Diario de Unidades Vendidas', value: 'promedio_cantidadund' },
+          { name: 'Totales Generales de Facturas Emitidas', value: 'total_cantidadfac' },
+          { name: 'Promedio Diario de Facturas Emitidas', value: 'promedio_cantidadfac' },
+          { name: 'Totales Generales de Unidades en Bolsa', value: 'total_valor_uxb' },
+          { name: 'Promedio Diario de Unidades en Bolsa', value: 'promedio_valor_uxb' },
+          { name: 'Totales Generales de Valor Promedio de la Unidad', value: 'total_valor_up' },
+          { name: 'Promedio Diario de Valor Promedio de la Unidad', value: 'promedio_valor_up' },
+          { name: 'Totales Generales de Clientes Atendidos', value: 'total_clientesa' },
+          { name: 'Promedio Diario de Clientes Atendidos', value: 'promedio_clientesa' },
+          { name: 'Totales Generales de Clientes Frecuentes', value: 'total_clientesf' },
+          { name: 'Promedio Diario de Clientes Frecuentes', value: 'promedio_clientesf' },
+          { name: 'Totales Generales de Clientes Nuevos', value: 'total_clientesn' },
+          { name: 'Promedio Diario de Clientes Nuevos', value: 'promedio_clientesn' },
         ];
       case 'statistical':
         return [
-          { name: 'Día más Exitoso', value: 'diamassexitoso' },
-          { name: 'Venta más Exitosa', value: 'ventamasexitosa' },
-          { name: 'Ranking de 5 Operadores más Productivos', value: 'rankingoperadores' },
-          { name: 'Ranking de 5 Fabricantes más Vendidos', value: 'rankingfabricantes' },
+          { name: 'Día más Exitoso', value: 'total_diamassexitoso' },
+          { name: 'Venta más Exitosa', value: 'total_ventamasexitosa' },
+          { name: 'Ranking de 5 Operadores más Productivos', value: 'total_rankingoperadores' },
+          { name: 'Ranking de 5 Fabricantes más Vendidos', value: 'total_rankingfabricantes' },
         ];
       default:
         return [];
@@ -56,6 +57,7 @@ const Modal = ({ category, onClose, onSave, selectedGraph }) => {
 
   const handleItemClick = (graph) => {
     setCurrentSelectedGraph(graph.value)
+    setNameSelectedGraph(graph.name)
   }  
 
   const handleClose = () => {
@@ -67,9 +69,12 @@ const Modal = ({ category, onClose, onSave, selectedGraph }) => {
   }
 
   const handleSave = () => {
-    console.log('Saving currentSelectedGraph:', currentSelectedGraph)
-    onSave(currentSelectedGraph)
-    localStorage.setItem('selectedGraph', currentSelectedGraph)
+    const [prefix, baseValue] = currentSelectedGraph.split('_')
+    console.log('Saving currentSelectedGraph:', baseValue)
+    console.log('Saving currentSelectedGraph:', nameSelectedGraph)
+    onSave(baseValue)
+    localStorage.setItem('selectedGraph', baseValue)
+    localStorage.setItem('selectedGraphName', nameSelectedGraph)
     handleClose()
   }
 
