@@ -15,9 +15,7 @@ import FooterGraph from './Footer'
 import Modal from './Modal'
 import GraphTypeModal from './GraphType'
 import instance from '@g/api'
-import BarChartComponent from './BarChart'
-import LineChartComponent from './AreaChart'
-import PieChartComponent from './PieChart'
+import { defaultChartTypes } from '@conf/defaultChartTypes'
 
 export default function Category() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
@@ -87,13 +85,27 @@ export default function Category() {
 
   const handleSaveGraphs = (graph) => {
     setSelectedGraph(graph)
+    
+    // Guardar el nombre del gráfico en localStorage
+    localStorage.setItem('selectedGraphName', graph)
+    
+    // Determinar el tipo de gráfico predeterminado basado en el nombre del gráfico
+    const defaultGraphType = defaultChartTypes[graph] || 'Barra'
+  
     console.log('Graph saved:', graph)
+    console.log('Default graph type set:', defaultGraphType)
+  
+    // Establecer el tipo de gráfico seleccionado
+    setSelectedGraphType(defaultGraphType)
+    localStorage.setItem('selectedGraphType', defaultGraphType)
   }
 
   const handleSaveGraphType = (graphType) => {
+    console.log('Graph type to be saved:', graphType)
     setSelectedGraphType(graphType)
-    console.log('Graph type saved:', graphType)
-  }
+    localStorage.setItem('selectedGraphType', graphType)
+    console.log('Selected graph type set to:', graphType)
+  }  
 
   const handleFetchChartData = async () => {
     const dateRange = JSON.parse(localStorage.getItem('dateRange'))
@@ -192,7 +204,7 @@ export default function Category() {
         <GraphTypeModal
           onClose={handleCloseGraphTypeModal}
           onSave={handleSaveGraphType}
-          selectedGraphType={selectedGraphType}
+          selectedGraphName={selectedGraph}
         />
       )}
     </div>

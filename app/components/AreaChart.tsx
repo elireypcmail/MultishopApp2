@@ -41,10 +41,6 @@ export default function LineChartComponent({ data } : { data: { periodo: string,
   
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Line Chart</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
-      </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart
@@ -65,14 +61,19 @@ export default function LineChartComponent({ data } : { data: { periodo: string,
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+              content={<ChartTooltipContent indicator="line" />}
             />
             <Line
               dataKey="total"
               type="natural"
               stroke="var(--color-desktop)"
               strokeWidth={2}
-              dot={false}
+              dot={{
+                fill: "var(--color-desktop)",
+              }}
+              activeDot={{
+                r: 6,
+              }}
             />
           </LineChart>
         </ChartContainer>

@@ -66,6 +66,12 @@
         align-items: center;
         justify-content: center;
         height: 58vh;
+
+        .\[\&_\.recharts-sector\[stroke\=\'\#fff\'\]\]\:stroke-transparent .recharts-sector[stroke='#fff'] {
+          stroke: rgb(0 0 0 / 14%);
+        }
+
+        .rounded-lg{ border: none; }
       }
     }
 

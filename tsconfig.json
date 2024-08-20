@@ -20,6 +20,9 @@
       "@a/*": [
         "./app/*"
       ],
+      "@conf/*": [
+        "./config/*"
+      ],
       "@c/*": [
         "./app/components/*"
       ],

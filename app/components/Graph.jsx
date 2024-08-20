@@ -5,6 +5,7 @@ import BarChartComponent from './BarChart'
 import PieChartComponent from './PieChart'
 import LineChartComponent from './AreaChart'
 import { Sun, Moon, NotFound } from './Icons'
+import { defaultChartTypes } from '@conf/defaultChartTypes'
 
 export default function Graph() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export default function Graph() {
   const [chartDataState, setChartDataState] = useState([])
   const [nameGraph, setNameGraph] = useState('')
   const [dateGraph, setDateGraph] = useState('')
+  const [currentGraphType, setCurrentGraphType] = useState('') 
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true'
@@ -39,6 +41,17 @@ export default function Graph() {
     }
   }, [chartData, nameGraph])
 
+  useEffect(() => {
+    if (selectedGraphType) {
+      const defaultGraphType = defaultChartTypes[nameGraph] || 'Barra'
+      console.log(defaultGraphType)
+      setCurrentGraphType(defaultGraphType)
+    } else {
+      setCurrentGraphType(selectedGraphType)
+      console.log(selectedGraphType)
+    }
+  }, [selectedGraphType, nameGraph])
+
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode
     setDarkMode(newDarkMode)
@@ -53,12 +66,14 @@ export default function Graph() {
       const to = new Date(date.to).toLocaleDateString('en-CA')
 
       setNameGraph(res)
-      setDateGraph(`${from} / ${to}`)
+      setDateGraph(`${from} - ${to}`)
     }
   }
 
   const renderChart = () => {
-    switch (selectedGraphType) {
+    console.log(currentGraphType)
+    
+    switch (currentGraphType) {
       case 'Barra':
         return <BarChartComponent data={chartDataState} />
       case 'Torta':
@@ -66,14 +81,16 @@ export default function Graph() {
       case 'Línea':
         return <LineChartComponent data={chartDataState} />
       default:
-        return <div className='not-found'>
-          <div className="icon-not-found">
-            <NotFound />
+        return (
+          <div className='not-found'>
+            <div className="icon-not-found">
+              <NotFound />
+            </div>
+            <span>
+              No se ha seleccionado ningún tipo de gráfico.
+            </span>
           </div>
-          <span>
-            No se ha seleccionado ningún tipo de gráfico.
-          </span>
-        </div>
+        )
     }
   }
 
