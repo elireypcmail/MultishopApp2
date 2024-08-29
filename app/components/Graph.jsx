@@ -4,7 +4,7 @@ import FooterGraph from './Footer'
 import BarChartComponent from './BarChart'
 import PieChartComponent from './PieChart'
 import LineChartComponent from './AreaChart'
-import { Sun, Moon, NotFound } from './Icons'
+import { Sun, Moon, NotFound, ArrowLeft } from './Icons'
 import { defaultChartTypes } from '@conf/defaultChartTypes'
 
 export default function Graph() {
@@ -69,7 +69,7 @@ export default function Graph() {
       const to = new Date(date.to).toLocaleDateString('en-CA')
 
       setNameGraph(res)
-      setDateGraph(`${from} - ${to}`)
+      setDateGraph(`${from} / ${to}`)
     }
   }
 
@@ -97,6 +97,11 @@ export default function Graph() {
     }
   }
 
+  const backRouter = (e) => {
+    e.preventDefault()
+    router.push('/listkkpi')
+  }
+
   return (
     <div className="body">
       <div className="calendar gra-content">
@@ -112,15 +117,24 @@ export default function Graph() {
           <div className="graph__header">
             {selectedGraphType ? (
               <>
-                <div className="graph__header__title">{nameGraph}</div>
-                <div className="graph__header__data">
-                  <span>{dateGraph}</span>
+                <div className="content-header">
+                  <div className="graph__header__title">{nameGraph}</div>
+                  <div className="graph__header__data">
+                    <span>{dateGraph}</span>
+                  </div>
                 </div>
               </>
             ) : null}
           </div>
           <div className="graph__body__content">
             {renderChart()}
+          </div>
+
+          <div className="button__graph">
+            <button className='btn' onClick={backRouter}>
+              <ArrowLeft></ArrowLeft>
+              <span>Atrás</span>
+            </button>
           </div>
         </div>
 

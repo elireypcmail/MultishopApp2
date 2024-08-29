@@ -46,9 +46,8 @@ export default function Category() {
     localStorage.setItem('selectedCategory', category)
     setSelectedCategory(category)
 
-    // Navegar a la vista de gráficos
     router.push({
-      pathname: '/list',
+      pathname: '/listkpi',
       query: { category }
     })
   }

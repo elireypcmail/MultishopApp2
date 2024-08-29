@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { CloseModal, Sun, Moon } from './Icons'
+import { ArrowLeft, Sun, Moon } from './Icons'
 import multishop from "@p/Logo Sistema Multishop Pequeno.png"
 import Image from "next/image"
 import FooterGraph from './Footer'
