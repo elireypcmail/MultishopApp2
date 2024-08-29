@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { ArrowLeft, Sun, Moon } from './Icons'
@@ -9,8 +11,7 @@ import { defaultChartTypes } from '@conf/defaultChartTypes'
 
 const Modal = () => {
   const router = useRouter()
-  const category = router.query.category || localStorage.getItem('selectedCategory') // Obtener la categoría desde query o localStorage
-
+  const [category, setCategory] = useState('')
   const [currentSelectedGraph, setCurrentSelectedGraph] = useState('')
   const [selectedGraphType, setSelectedGraphType] = useState(null)
   const [darkMode, setDarkMode] = useState(false)
@@ -18,17 +19,20 @@ const Modal = () => {
   const [chartData, setChartData] = useState([])
 
   useEffect(() => {
+    const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
+    setCategory(savedCategory || '')
+
     const savedDarkMode = localStorage.getItem("darkMode")
     if (savedDarkMode !== null) {
       setDarkMode(JSON.parse(savedDarkMode))
     }
-  }, [])
+  }, [router.query.category])
 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {
-      document.documentElement.classList.remove('dark') 
+      document.documentElement.classList.remove('dark')
     }
   }, [darkMode])
 
