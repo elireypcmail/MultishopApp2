@@ -1035,6 +1035,31 @@ const ArrowLeft = () => {
   )
 }
 
+const Options = () => {
+  return(
+    <svg 
+      fill="#242b39b9" 
+      viewBox="0 0 24 24" 
+      xmlns="http://www.w3.org/2000/svg"
+      width="25"
+      height="25"
+    >
+      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+      <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+      <g id="SVGRepo_iconCarrier"> 
+        <g data-name="Layer 2"> 
+          <g data-name="options-2"> 
+            <rect width="24" height="24" transform="rotate(90 12 12)" opacity="0"></rect> 
+            <path d="M19 9a3 3 0 0 0-2.82 2H3a1 1 0 0 0 0 2h13.18A3 3 0 1 0 19 9zm0 4a1 1 0 1 1 1-1 1 1 0 0 1-1 1z"></path> 
+            <path d="M3 7h1.18a3 3 0 0 0 5.64 0H21a1 1 0 0 0 0-2H9.82a3 3 0 0 0-5.64 0H3a1 1 0 0 0 0 2zm4-2a1 1 0 1 1-1 1 1 1 0 0 1 1-1z"></path> 
+            <path d="M21 17h-7.18a3 3 0 0 0-5.64 0H3a1 1 0 0 0 0 2h5.18a3 3 0 0 0 5.64 0H21a1 1 0 0 0 0-2zm-10 2a1 1 0 1 1 1-1 1 1 0 0 1-1 1z"></path> 
+          </g> 
+        </g> 
+      </g>
+    </svg>
+  )
+}
+
 export {
   UserLogin,
   Identificacion,
@@ -1065,5 +1090,6 @@ export {
   LineGraph,
   NotFound,
   CategoryList,
-  ArrowLeft
+  ArrowLeft,
+  Options
 }

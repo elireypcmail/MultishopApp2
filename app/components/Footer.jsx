@@ -22,7 +22,7 @@ export default function FooterGraph() {
           </Link>
         </span>
         <span className="link">
-          <Link href={'/list'}>
+          <Link href={'/listkpi'}>
             <CategoryList />
           </Link>
         </span>

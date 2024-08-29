@@ -4,7 +4,7 @@ import FooterGraph from './Footer'
 import BarChartComponent from './BarChart'
 import PieChartComponent from './PieChart'
 import LineChartComponent from './AreaChart'
-import { Sun, Moon, NotFound, ArrowLeft } from './Icons'
+import { Sun, Moon, NotFound, ArrowLeft, Options } from './Icons'
 import { defaultChartTypes } from '@conf/defaultChartTypes'
 
 export default function Graph() {
@@ -99,18 +99,24 @@ export default function Graph() {
 
   const backRouter = (e) => {
     e.preventDefault()
-    router.push('/listkkpi')
+    router.push('/listkpi')
   }
 
   return (
     <div className="body">
       <div className="calendar gra-content">
-        <div className="mood">
-          <button className={`mood-btn ${darkMode ? 'dark' : ''}`} onClick={toggleDarkMode}>
-            <Sun className="icon" />
-            <div className="circle2"></div>
-            <Moon className="icon" />
-          </button>
+        <div className="graph-option">
+          <div className="graph-type">
+            <Options />
+          </div>
+
+          <div className="mood">
+            <button className={`mood-btn ${darkMode ? 'dark' : ''}`} onClick={toggleDarkMode}>
+              <Sun className="icon" />
+              <div className="circle2"></div>
+              <Moon className="icon" />
+            </button>
+          </div>
         </div>
 
         <div className="graph__body">
