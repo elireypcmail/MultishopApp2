@@ -62,15 +62,24 @@ export default function DateComponent() {
   return (
     <div className="body">
       <div className="calendar">
-        <div className="mood">
-          <button
-            className={`mood-btn ${darkMode ? "dark" : ""}`}
-            onClick={toggleDarkMode}
-          >
-            <Sun className="icon" />
-            <div className="circle2"></div>
-            <Moon className="icon" />
-          </button>
+        <div className="nav">
+          <div className="logo-small">
+            <Image
+              src={multishop}
+              className="mutishop"
+              alt="Logo de Multishop"
+            />
+          </div>
+          <div className="mood">
+            <button
+              className={`mood-btn ${darkMode ? "dark" : ""}`}
+              onClick={toggleDarkMode}
+            >
+              <Sun className="icon" />
+              <div className="circle2"></div>
+              <Moon className="icon" />
+            </button>
+          </div>
         </div>
         <div className="title-calendar">
           <h1>Selecciona el rango de fecha</h1>
@@ -81,13 +90,6 @@ export default function DateComponent() {
           </div>
         </div>
         <div className="footer2">
-          <div className="logo-small">
-            <Image
-              src={multishop}
-              className="mutishop"
-              alt="Logo de Multishop"
-            />
-          </div>
           <div className="button-calendar" onClick={handleNext}>
             <span>Siguiente</span>
             <ArrowRight />

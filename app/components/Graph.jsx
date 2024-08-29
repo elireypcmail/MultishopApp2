@@ -46,11 +46,14 @@ export default function Graph() {
       const defaultGraphType = defaultChartTypes[nameGraph] || 'Barra'
       console.log(defaultGraphType)
       setCurrentGraphType(defaultGraphType)
-    } else {
+    } else if (!selectedGraphType) {
+      console.log(currentGraphType);
+      console.log(selectedGraphType);
+      
       setCurrentGraphType(selectedGraphType)
       console.log(selectedGraphType)
     }
-  }, [selectedGraphType, nameGraph])
+  }, [selectedGraphType, nameGraph])  
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode

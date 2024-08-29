@@ -3,8 +3,6 @@ import {
   Financial, 
   Operative, 
   Statistical, 
-  ArrowRight, 
-  ArrowDown, 
   Sun, 
   Moon 
 } from './Icons'
@@ -12,24 +10,18 @@ import Image from 'next/image'
 import { useRouter } from 'next/router'
 import multishop from '@p/Logo Sistema Multishop Pequeno.png'
 import FooterGraph from './Footer'
-import Modal from './Modal'
-import GraphTypeModal from './GraphType'
-import instance from '@g/api'
-import { defaultChartTypes } from '@conf/defaultChartTypes'
 
 export default function Category() {
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false)
-  const [isGraphTypeModalOpen, setIsGraphTypeModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [selectedGraph, setSelectedGraph] = useState(null)
-  const [selectedGraphType, setSelectedGraphType] = useState(null)
   const [darkMode, setDarkMode] = useState(false)
-  const [chartData, setChartData] = useState([])
-  const [isDataFetched, setIsDataFetched] = useState(false)
-
   const router = useRouter()
 
   useEffect(() => {
+    const savedCategory = localStorage.getItem('selectedCategory')
+    if (savedCategory) {
+      setSelectedCategory(savedCategory)
+    }
+
     const savedDarkMode = localStorage.getItem("darkMode")
     if (savedDarkMode !== null) {
       setDarkMode(JSON.parse(savedDarkMode))
@@ -44,21 +36,6 @@ export default function Category() {
     }
   }, [darkMode])
 
-  useEffect(() => {
-    if (isDataFetched && chartData.length > 0) {
-      console.log(JSON.stringify(chartData))
-      
-      router.push({
-        pathname: '/graph',
-        query: {
-          selectedGraph,
-          selectedGraphType,
-          chartData: JSON.stringify(chartData),
-        },
-      })
-    }
-  }, [isDataFetched, chartData, router, selectedGraph, selectedGraphType])
-
   const toggleDarkMode = () => {
     const newMode = !darkMode
     setDarkMode(newMode)
@@ -66,83 +43,37 @@ export default function Category() {
   }
 
   const handleCategoryClick = (category) => {
+    localStorage.setItem('selectedCategory', category)
     setSelectedCategory(category)
-    setIsCategoryModalOpen(true)
-    console.log('Category clicked:', category)
-  }
 
-  const handleGraphTypeClick = () => {
-    setIsGraphTypeModalOpen(true)
-  }
-
-  const handleCloseCategoryModal = () => {
-    setIsCategoryModalOpen(false)
-  }
-
-  const handleCloseGraphTypeModal = () => {
-    setIsGraphTypeModalOpen(false)
-  }
-
-  const handleSaveGraphs = (graph) => {
-    setSelectedGraph(graph)
-    
-    // Guardar el nombre del gráfico en localStorage
-    localStorage.setItem('selectedGraphName', graph)
-    
-    // Determinar el tipo de gráfico predeterminado basado en el nombre del gráfico
-    const defaultGraphType = defaultChartTypes[graph] || 'Barra'
-  
-    console.log('Graph saved:', graph)
-    console.log('Default graph type set:', defaultGraphType)
-  
-    // Establecer el tipo de gráfico seleccionado
-    setSelectedGraphType(defaultGraphType)
-    localStorage.setItem('selectedGraphType', defaultGraphType)
-  }
-
-  const handleSaveGraphType = (graphType) => {
-    console.log('Graph type to be saved:', graphType)
-    setSelectedGraphType(graphType)
-    localStorage.setItem('selectedGraphType', graphType)
-    console.log('Selected graph type set to:', graphType)
-  }  
-
-  const handleFetchChartData = async () => {
-    const dateRange = JSON.parse(localStorage.getItem('dateRange'))
-    const { from, to } = dateRange
-
-    try {
-      const response = await instance.post('/filter-data', {
-        nombreCliente: 'prueba',
-        nombreTabla: 'ventas',
-        fechaInicio: from,
-        fechaFin: to,
-        kpi: selectedGraph,
-      })
-
-      setChartData(response.data)
-      setIsDataFetched(true)
-      console.log(response.data)
-
-    } catch (error) {
-      console.error('Error fetching chart data:', error)
-    }
-  }
-
-  const handleSearchGraph = async (e) => {
-    e.preventDefault()
-    await handleFetchChartData()
+    // Navegar a la vista de gráficos
+    router.push({
+      pathname: '/list',
+      query: { category }
+    })
   }
 
   return (
     <div className="body">
       <div className="calendar">
-        <div className="mood">
-          <button className={`mood-btn ${darkMode ? 'dark' : ''}`} onClick={toggleDarkMode}>
-            <Sun className="icon" />
-            <div className="circle2"></div>
-            <Moon className="icon" />
-          </button>
+        <div className="nav">
+          <div className="logo-small">
+            <Image
+              src={multishop}
+              className="mutishop"
+              alt="Logo de Multishop"
+            />
+          </div>
+          <div className="mood">
+            <button
+              className={`mood-btn ${darkMode ? "dark" : ""}`}
+              onClick={toggleDarkMode}
+            >
+              <Sun className="icon" />
+              <div className="circle2"></div>
+              <Moon className="icon" />
+            </button>
+          </div>
         </div>
 
         <div className="container-ca">
@@ -151,62 +82,32 @@ export default function Category() {
           </div>
 
           <div className="row-ca">
-            <div className="categoria" onClick={() => handleCategoryClick('financial')}>
+            <div 
+              className={`categoria ${selectedCategory === 'Financieros' ? 'active' : ''}`}
+              onClick={() => handleCategoryClick('Financieros')}
+            >
               <Financial />
               <span className='ca-ti'>Análisis Financiero</span>
             </div>
-            <div className="categoria" onClick={() => handleCategoryClick('operative')}>
+            <div 
+              className={`categoria ${selectedCategory === 'Operativos' ? 'active' : ''}`}
+              onClick={() => handleCategoryClick('Operativos')}
+            >
               <Operative />
               <span className='ca-ti'>Análisis Operativo</span>
             </div>
-            <div className="categoria" onClick={() => handleCategoryClick('statistical')}>
+            <div 
+              className={`categoria ${selectedCategory === 'Estadísticos' ? 'active' : ''}`}
+              onClick={() => handleCategoryClick('Estadísticos')}
+            >
               <Statistical />
               <span className='ca-ti'>Análisis Estadístico</span>
             </div>
-          </div>
-
-          <div className="title-graph">
-            <h1>Selecciona el tipo de gráfico</h1>
-          </div>
-          <div className="row-graph" onClick={handleGraphTypeClick}>
-            <div className="graph">
-              Selecciona aquí
-              <div className="arrow">
-                <ArrowDown />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="footer2-ca">
-          <div className="logo-small">
-            <Image src={multishop} className="mutishop" alt="Logo de Multishop" />
-          </div>
-          <div className="button-calendar" onClick={handleSearchGraph}>
-            <span>Buscar gráfico</span>
-            <ArrowRight />
           </div>
         </div>
 
         <FooterGraph />
       </div>
-
-      {isCategoryModalOpen && (
-        <Modal
-          category={selectedCategory}
-          onClose={handleCloseCategoryModal}
-          onSave={handleSaveGraphs}
-          selectedGraph={selectedGraph}
-        />
-      )}
-
-      {isGraphTypeModalOpen && (
-        <GraphTypeModal
-          onClose={handleCloseGraphTypeModal}
-          onSave={handleSaveGraphType}
-          selectedGraphName={selectedGraph}
-        />
-      )}
     </div>
   )
 }

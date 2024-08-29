@@ -1,14 +1,59 @@
 import React, { useState, useEffect } from 'react'
-import { CloseModal } from './Icons'
+import { useRouter } from 'next/router'
+import { CloseModal, Sun, Moon } from './Icons'
+import multishop from "@p/Logo Sistema Multishop Pequeno.png"
+import Image from "next/image"
+import FooterGraph from './Footer'
+import instance from '@g/api'
+import { defaultChartTypes } from '@conf/defaultChartTypes'
 
-const Modal = ({ category, onClose, onSave, selectedGraph }) => {
-  const [currentSelectedGraph, setCurrentSelectedGraph] = useState(selectedGraph)
-  const [nameSelectedGraph, setNameSelectedGraph] = useState('')
-  const [closing, setClosing] = useState(false)
+const Modal = () => {
+  const router = useRouter()
+  const category = router.query.category || localStorage.getItem('selectedCategory') // Obtener la categoría desde query o localStorage
+
+  const [currentSelectedGraph, setCurrentSelectedGraph] = useState('')
+  const [selectedGraphType, setSelectedGraphType] = useState(null)
+  const [darkMode, setDarkMode] = useState(false)
+  const [isDataFetched, setIsDataFetched] = useState(false)
+  const [chartData, setChartData] = useState([])
+
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem("darkMode")
+    if (savedDarkMode !== null) {
+      setDarkMode(JSON.parse(savedDarkMode))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark') 
+    }
+  }, [darkMode])
+
+  useEffect(() => {
+    if (isDataFetched && chartData.length > 0) {
+      router.push({
+        pathname: '/graph',
+        query: {
+          selectedGraph: currentSelectedGraph,
+          selectedGraphType,
+          chartData: JSON.stringify(chartData),
+        },
+      })
+    }
+  }, [isDataFetched, chartData, router, currentSelectedGraph, selectedGraphType])
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode
+    setDarkMode(newMode)
+    localStorage.setItem("darkMode", JSON.stringify(newMode))
+  }
 
   const getGraphs = () => {
     switch (category) {
-      case 'financial':
+      case 'Financieros':
         return [
           { name: 'Totales Generales de Venta', value: 'total_totalventa' },
           { name: 'Promedio Diario de Venta', value: 'promedio_totalventa' },
@@ -21,8 +66,8 @@ const Modal = ({ category, onClose, onSave, selectedGraph }) => {
           { name: 'Totales Generales de Porcentaje de Utilidad', value: 'total_porcentajedeutilidad' },
           { name: 'Promedio Diario de Porcentaje de Utilidad', value: 'promedio_porcentajedeutilidad' },
           { name: 'Promedio Diario de Margen de Ganancia', value: 'promedio_margendeldia' },
-        ];
-      case 'operative':
+        ]
+      case 'Operativos':
         return [
           { name: 'Totales Generales de Unidades Vendidas', value: 'total_cantidadund' },
           { name: 'Promedio Diario de Unidades Vendidas', value: 'promedio_cantidadund' },
@@ -38,71 +83,112 @@ const Modal = ({ category, onClose, onSave, selectedGraph }) => {
           { name: 'Promedio Diario de Clientes Frecuentes', value: 'promedio_clientesf' },
           { name: 'Totales Generales de Clientes Nuevos', value: 'total_clientesn' },
           { name: 'Promedio Diario de Clientes Nuevos', value: 'promedio_clientesn' },
-        ];
-      case 'statistical':
+        ]
+      case 'Estadísticos':
         return [
           { name: 'Día más Exitoso', value: 'total_diamassexitoso' },
           { name: 'Venta más Exitosa', value: 'total_ventamasexitosa' },
           { name: 'Ranking de 5 Operadores más Productivos', value: 'total_rankingoperadores' },
           { name: 'Ranking de 5 Fabricantes más Vendidos', value: 'total_rankingfabricantes' },
-        ];
+        ]
       default:
-        return [];
+        return []
     }
   }
 
-  useEffect(() => {
-    setCurrentSelectedGraph(selectedGraph)
-  }, [selectedGraph])
-
   const handleItemClick = (graph) => {
+    const [prefix, baseValue] = graph.value.split('_')
+  
+    localStorage.setItem('selectedGraph', baseValue)
+    localStorage.setItem('selectedGraphName', graph.name)
+  
     setCurrentSelectedGraph(graph.value)
-    setNameSelectedGraph(graph.name)
-  }  
-
-  const handleClose = () => {
-    setClosing(true)
-    setTimeout(() => {
-      onClose()
-      setClosing(false)
-    }, 300)
+  
+    const defaultGraphType = defaultChartTypes[graph.name] || 'Barra'
+    setSelectedGraphType(defaultGraphType)
+    localStorage.setItem('selectedGraphType', defaultGraphType)
   }
 
-  const handleSave = () => {
-    const [prefix, baseValue] = currentSelectedGraph.split('_')
-    console.log('Saving currentSelectedGraph:', baseValue)
-    console.log('Saving currentSelectedGraph:', nameSelectedGraph)
-    onSave(baseValue)
-    localStorage.setItem('selectedGraph', baseValue)
-    localStorage.setItem('selectedGraphName', nameSelectedGraph)
-    handleClose()
+  const handleFetchChartData = async () => {
+    const dateRange = JSON.parse(localStorage.getItem('dateRange'))
+    const { from, to } = dateRange
+
+    try {
+      const response = await instance.post('/filter-data', {
+        nombreCliente: 'yender',
+        nombreTabla: 'ventas',
+        fechaInicio: from,
+        fechaFin: to,
+        kpi: localStorage.getItem('selectedGraph'),
+      })
+
+      setChartData(response.data)
+      setIsDataFetched(true)
+
+      router.push('/graph')
+    } catch (error) {
+      console.error('Error fetching chart data:', error)
+    }
+  }
+
+  const handleSearchGraph = async (e) => {
+    e.preventDefault()
+    await handleFetchChartData()
+  }
+
+  const handleClose = () => {
+    router.push('/category')
   }
 
   return (
-    <div className={`modal-ca ${closing ? 'fade-out' : 'fade-in'}`}>
-      <div className={`modal-content ${closing ? 'fade-out' : 'fade-in'}`}>
-        <span className="close-button" onClick={handleClose}>
-          <CloseModal />
-        </span>
-        <h2 className='ti-graph'>Gráficos de {category}</h2>
-        <ul className='li'>
-          {getGraphs().map((graph) => (
-            <li
-              key={graph.value}
-              className={`separate ${currentSelectedGraph === graph.value ? 'selected' : ''}`}
-              onClick={() => handleItemClick(graph)}
-            >
-              <div className="list">
-                <div className="gra-li">
-                  {graph.name}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-        <div className="save-button-container">
-          <button onClick={handleSave} disabled={!currentSelectedGraph}>Guardar</button>
+    <div className="body">
+      <div className="calendar">
+        <div className="nav">
+            <div className="logo-small">
+              <Image
+                src={multishop}
+                className="mutishop"
+                alt="Logo de Multishop"
+              />
+            </div>
+            <div className="mood">
+              <button
+                className={`mood-btn ${darkMode ? "dark" : ""}`}
+                onClick={toggleDarkMode}
+              >
+                <Sun className="icon" />
+                <div className="circle2"></div>
+                <Moon className="icon" />
+              </button>
+            </div>
+          </div>
+
+        <div className='modal-ca'>
+          <div className='modal-content'>
+            <h2 className='ti-graph'>Gráficos {category}</h2>
+            <ul className='li'>
+              {getGraphs().map((graph) => (
+                <li
+                  key={graph.value}
+                  className={`separate ${currentSelectedGraph === graph.value ? 'selected' : ''}`}
+                  onClick={() => handleItemClick(graph)}
+                >
+                  <div className="list">
+                    <div className="gra-li">
+                      {graph.name}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="save-button-container">
+              <button onClick={handleClose}>Atrás</button>
+              <button onClick={handleSearchGraph} disabled={!currentSelectedGraph}>Buscar</button>
+            </div>
+          </div>
         </div>
+
+        <FooterGraph />
       </div>
     </div>
   )

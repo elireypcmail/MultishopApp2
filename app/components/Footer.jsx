@@ -2,6 +2,7 @@ import Link from "next/link"
 import { 
   CalendarRange,
   CategoryGraph,
+  CategoryList,
   Graph,
   Logout
 } from "./Icons"
@@ -18,6 +19,11 @@ export default function FooterGraph() {
         <span className="link">
           <Link href={'/category'}>
             <CategoryGraph />
+          </Link>
+        </span>
+        <span className="link">
+          <Link href={'/list'}>
+            <CategoryList />
           </Link>
         </span>
         <span className="link">
