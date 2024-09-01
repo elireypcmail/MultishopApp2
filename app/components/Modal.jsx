@@ -119,7 +119,7 @@ const Modal = () => {
 
     try {
       const response = await instance.post('/filter-data', {
-        nombreCliente: 'yender',
+        nombreCliente: 'prueba',
         nombreTabla: 'ventas',
         fechaInicio: from,
         fechaFin: to,
