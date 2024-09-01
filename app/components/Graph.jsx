@@ -6,6 +6,7 @@ import PieChartComponent from './PieChart'
 import LineChartComponent from './AreaChart'
 import { Sun, Moon, NotFound, ArrowLeft, Options } from './Icons'
 import { defaultChartTypes } from '@conf/defaultChartTypes'
+import GraphTypeModal from './GraphType'
 
 export default function Graph() {
   const router = useRouter()
@@ -14,7 +15,8 @@ export default function Graph() {
   const [chartDataState, setChartDataState] = useState([])
   const [nameGraph, setNameGraph] = useState('')
   const [dateGraph, setDateGraph] = useState('')
-  const [currentGraphType, setCurrentGraphType] = useState('') 
+  const [currentGraphType, setCurrentGraphType] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false) 
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true'
@@ -42,18 +44,9 @@ export default function Graph() {
   }, [chartData, nameGraph])
 
   useEffect(() => {
-    if (selectedGraphType) {
-      const defaultGraphType = defaultChartTypes[nameGraph] || 'Barra'
-      console.log(defaultGraphType)
-      setCurrentGraphType(defaultGraphType)
-    } else if (!selectedGraphType) {
-      console.log(currentGraphType);
-      console.log(selectedGraphType);
-      
-      setCurrentGraphType(selectedGraphType)
-      console.log(selectedGraphType)
-    }
-  }, [selectedGraphType, nameGraph])  
+    const defaultGraphType = defaultChartTypes[nameGraph] || 'Barra'
+    setCurrentGraphType(selectedGraphType || defaultGraphType)
+  }, [selectedGraphType, nameGraph])
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode
@@ -74,8 +67,6 @@ export default function Graph() {
   }
 
   const renderChart = () => {
-    console.log(currentGraphType)
-    
     switch (currentGraphType) {
       case 'Barra':
         return <BarChartComponent data={chartDataState} />
@@ -102,11 +93,24 @@ export default function Graph() {
     router.push('/listkpi')
   }
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+  }
+
+  const handleSaveGraphType = (newGraphType) => {
+    setCurrentGraphType(newGraphType)
+    setIsModalOpen(false)
+  }
+
   return (
     <div className="body">
       <div className="calendar gra-content">
         <div className="graph-option">
-          <div className="graph-type">
+          <div className="graph-type" onClick={handleOpenModal}>
             <Options />
           </div>
 
@@ -146,6 +150,14 @@ export default function Graph() {
 
         <FooterGraph />
       </div>
+
+      {isModalOpen && (
+        <GraphTypeModal
+          onClose={handleCloseModal}
+          onSave={handleSaveGraphType}
+          selectedGraphName={nameGraph}
+        />
+      )}
     </div>
   )
 }
