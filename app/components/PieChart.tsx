@@ -23,7 +23,7 @@ const chartConfig = {
 
 const colorMap = {
   "total_valor": "hsl(var(--chart-1))",
-  "promedio_valor": "hsl(var(--chart-2))",
+  "promedio_valor": "hsl(var(--chart-1))",
 }
 
 export default function PieChartComponent({ data }: { data: { periodo: string, total_valor: number, promedio_valor: number }[] }) {

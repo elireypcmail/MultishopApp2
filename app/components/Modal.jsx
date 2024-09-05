@@ -67,8 +67,8 @@ const Modal = () => {
           { name: 'Promedio Diario de Valor Ticket de Venta', value: 'promedio_valor_tp' },
           { name: 'Totales Generales de Costos de Venta', value: 'total_totalcosto' },
           { name: 'Promedio Diario de Costos de Venta', value: 'promedio_totalcosto' },
-          { name: 'Totales Generales de Porcentaje de Utilidad', value: 'total_porcentajedeutilidad' },
-          { name: 'Promedio Diario de Porcentaje de Utilidad', value: 'promedio_porcentajedeutilidad' },
+          /* { name: 'Totales Generales de Porcentaje de Utilidad', value: 'total_porcentajedeutilidad' },
+          { name: 'Promedio Diario de Porcentaje de Utilidad', value: 'promedio_porcentajedeutilidad' }, */
           { name: 'Promedio Diario de Margen de Ganancia', value: 'promedio_margendeldia' },
         ]
       case 'Operativos':
@@ -101,17 +101,17 @@ const Modal = () => {
   }
 
   const handleItemClick = (graph) => {
-    const [prefix, baseValue] = graph.value.split('_')
-  
+    const baseValue = graph.value.replace(/^(total_|promedio_)/, '')
+    
     localStorage.setItem('selectedGraph', baseValue)
     localStorage.setItem('selectedGraphName', graph.name)
-  
+    
     setCurrentSelectedGraph(graph.value)
-  
+    
     const defaultGraphType = defaultChartTypes[graph.name] || 'Barra'
     setSelectedGraphType(defaultGraphType)
     localStorage.setItem('selectedGraphType', defaultGraphType)
-  }
+  }  
 
   const handleFetchChartData = async () => {
     const dateRange = JSON.parse(localStorage.getItem('dateRange'))
@@ -119,7 +119,7 @@ const Modal = () => {
 
     try {
       const response = await instance.post('/filter-data', {
-        nombreCliente: 'prueba',
+        nombreCliente: 'yender',
         nombreTabla: 'ventas',
         fechaInicio: from,
         fechaFin: to,
