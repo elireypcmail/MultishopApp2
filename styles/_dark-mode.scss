@@ -82,6 +82,10 @@
         background: rgba(255, 255, 255, 0.067);
         border: 1px solid rgba(255, 255, 255, 0.088);
       }
+
+      .graph-option .graph-type svg{
+        fill: rgba(255, 255, 255, 0.816);
+      }
     }
 
     .rdp-day_range {
@@ -157,6 +161,10 @@
     .gra-content .graph__body{
       background: rgba(255, 255, 255, 0.067);
       border: 1px solid rgba(255, 255, 255, 0.088);
+
+      .graph__header__data span{
+        color: rgba(255, 255, 255, 0.571);
+      }
     }
 
     .graph__body__content {

@@ -1,7 +1,7 @@
-import DateComponent from '@c/Date'
+import Date  from '@c/Date'
 
 export default function Dash() {
   return(
-    <DateComponent />
+    <Date />
   )
 }

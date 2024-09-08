@@ -19,22 +19,40 @@ const Modal = () => {
   const [chartData, setChartData] = useState([])
 
   useEffect(() => {
-    const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
-    setCategory(savedCategory || '')
-
     const savedDarkMode = localStorage.getItem("darkMode")
+    console.log('Saved dark mode from localStorage:', savedDarkMode) // Verifica qué valor devuelve localStorage
     if (savedDarkMode !== null) {
       setDarkMode(JSON.parse(savedDarkMode))
     }
+  }, [])  
+
+  useEffect(() => {
+    const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
+    setCategory(savedCategory || '')
   }, [router.query.category])
 
   useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add('dark')
+      document.documentElement.classList.add("dark")
     } else {
-      document.documentElement.classList.remove('dark')
+      document.documentElement.classList.remove("dark")
     }
   }, [darkMode])
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode
+    console.log('Toggling dark mode. Current mode:', darkMode)
+    setDarkMode(newMode)
+    localStorage.setItem("darkMode", JSON.stringify(newMode))
+    
+    console.log('New mode set to:', newMode)
+    
+    if (newMode) {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+    }
+  }  
 
   useEffect(() => {
     if (isDataFetched && chartData.length > 0) {
@@ -48,12 +66,6 @@ const Modal = () => {
       })
     }
   }, [isDataFetched, chartData, router, currentSelectedGraph, selectedGraphType])
-
-  const toggleDarkMode = () => {
-    const newMode = !darkMode
-    setDarkMode(newMode)
-    localStorage.setItem("darkMode", JSON.stringify(newMode))
-  }
 
   const getGraphs = () => {
     switch (category) {
@@ -148,24 +160,27 @@ const Modal = () => {
     <div className="body">
       <div className="calendar">
         <div className="nav">
-            <div className="logo-small">
-              <Image
-                src={multishop}
-                className="mutishop"
-                alt="Logo de Multishop"
-              />
-            </div>
-            <div className="mood">
-              <button
-                className={`mood-btn ${darkMode ? "dark" : ""}`}
-                onClick={toggleDarkMode}
-              >
-                <Sun className="icon" />
-                <div className="circle2"></div>
-                <Moon className="icon" />
-              </button>
-            </div>
+          <div className="logo-small">
+            <Image
+              src={multishop}
+              className="mutishop"
+              alt="Logo de Multishop"
+            />
           </div>
+          <div className="mood">
+          <button
+            className={`mood-btn ${darkMode ? "dark" : ""}`}
+            onClick={() => {
+              console.log('Button clicked')
+              toggleDarkMode()
+            }}
+          >
+            <Sun className="icon" />
+            <div className="circle2"></div>
+            <Moon className="icon" />
+          </button>
+          </div>
+        </div>
 
         <div className='modal-ca'>
           <div className='modal-content'>
