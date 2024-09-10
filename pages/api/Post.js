@@ -1,35 +1,25 @@
-/* import instance from '@g/api'
+import instance from '@g/api'
 
-async function loginUser(data) {
-  console.log(data)
+export const loginUser = async (cliente) => {
   try {
-    const res = await instance.post(`/login/user`, data)
-    console.log(res)
-    return res
-  } catch (err) { console.error(err) }
-}
-
-async function verifyToken (token) {
-  try {
-    const res = await instance.post('/verify-token', { authHeader: `Bearer ${token}` });
-    return res;
-  } catch (err) {
-    console.error('Error al verificar token:', err);
-    throw err;
+    const response = await instance.post('/login/user', cliente)
+    console.log(response)
+    
+    return response.data
+  } catch (error) {
+    console.error('Error en la solicitud de login:', error)
+    throw error
   }
 }
 
-async function codeV(code) {
+export const verifyToken = async (token) => {
   try {
-    const res = instance.post('/code', code)
-    return res
-  } catch (err) {
-    console.error(err)
+    const response = await instance.post('/verify-token', { token })
+    console.log(response)
+    
+    return response.data
+  } catch (error) {
+    console.error('Error en la verificación del token:', error)
+    throw error
   }
 }
-
-export{
-  loginUser,
-  verifyToken,
-  codeV
-} */

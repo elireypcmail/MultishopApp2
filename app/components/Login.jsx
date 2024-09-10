@@ -1,16 +1,18 @@
-import { useState }  from 'react'
-import Image         from 'next/image'
-import multishop     from '@p/Logo Sistema Multishop Pequeno.png'
+// Login.js
+import { useState } from 'react'
+import Image from 'next/image'
+import multishop from '@p/Logo Sistema Multishop Pequeno.png'
 import { useRouter } from 'next/router'
-import VerifyCode    from './VerifyCode'
+import VerifyCode from './VerifyCode'
 import { loginUser, verifyToken } from '@api/Post'
-import { 
-  UserLogin, 
-  Identificacion, 
-  Instancia, 
-  Telefono, 
+import {
+  UserLogin,
+  Identificacion,
+  Instancia,
+  Telefono,
   Clave,
-  CloseModal } from '@c/Icons'
+  CloseModal,
+} from '@c/Icons'
 
 export default function Login() {
   const [cliente, setCliente] = useState({
@@ -18,11 +20,11 @@ export default function Login() {
     instancia: '',
     correo: '',
     telefono: '',
-    clave: ''
+    clave: '',
   })
-  const [idtError, setIdtError]     = useState('')
-  const [telError, setTelError]     = useState('')
-  const [tokenValue, setTokenValue] = useState(null) 
+  const [idtError, setIdtError] = useState('')
+  const [telError, setTelError] = useState('')
+  const [tokenValue, setTokenValue] = useState(null)
   const [verifyOpen, setVerifyOpen] = useState(false)
 
   const { push } = useRouter()
@@ -36,9 +38,53 @@ export default function Login() {
     }
   }
 
-  const handleVerifyClick = () => { setVerifyOpen(!verifyOpen) }
+  const validarTelefono = (value) => {
+    const regex = /^\d{4}-\d{7}$/
+    if (!regex.test(value)) {
+      setTelError('Formato incorrecto del teléfono')
+    } else {
+      setTelError('')
+    }
+  }
 
-  const closeVerifyModal = () => { 
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setCliente({ ...cliente, [name]: value })
+    if (name === 'identificacion') {
+      validarIdentificacion(value)
+    }
+    if (name === 'telefono') {
+      validarTelefono(value)
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await loginUser(cliente)
+      if (res?.tokenCode) {
+        const tokenRes = await verifyToken(res.tokenCode)
+        if (tokenRes?.success) {
+          setTokenValue(tokenRes.token)
+          console.log('Token obtenido:', tokenRes.token)
+          // Redirigir al usuario a la página principal o dashboard
+          push('/dashboard')
+        } else {
+          console.error('Error al verificar el token:', tokenRes.message)
+        }
+      } else {
+        console.error('Error en el inicio de sesión:', res.message)
+      }
+    } catch (error) {
+      console.error('Error en la solicitud:', error)
+    }
+  }
+
+  const handleVerifyClick = () => {
+    setVerifyOpen(!verifyOpen)
+  }
+
+  const closeVerifyModal = () => {
     const modalContent = document.querySelector('.modal-content-verify')
     const modalBackground = document.querySelector('.modal-verify')
     if (modalContent && modalBackground) {
@@ -53,69 +99,36 @@ export default function Login() {
     }
   }
 
-  const validarTelefono = (value) => {
-    const regex = /^\d{4}-\d{7}$/
-    if (!regex.test(value)) {
-      setTelError('Formato incorrecto del telefono')
-    } else {
-      setTelError('')
-    }
-  }
-
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setCliente({ ...cliente, [name]: value })
-    if (name === 'identificacion') { validarIdentificacion(value) }
-    if (name === 'telefono') { validarTelefono(value) }
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    /* try {
-      const res = await loginUser(cliente)
-      console.log(res.data.token)
-      if (res?.data && res?.data?.token) {
-        const token = res.data.token
-        const tokenRes = await verifyToken(token)
-        console.log(tokenRes)
-        if (tokenRes.data && tokenRes.data.success) {
-          setTokenValue(tokenRes.data.token)
-          console.log('Token obtenido:', tokenRes.data.token)
-        } else {
-          console.error('Error al obtener el token:', tokenRes.data ? tokenRes.data.message : 'Respuesta no válida')
-        }
-      } else {
-        console.error('Error en el inicio de sesión:', res.data ? res.data.message : 'Respuesta no válida')
-      }
-    } catch (error) {
-      console.error('Error en la solicitud:', error)
-    } */
-  }
-
   return (
-    <div className='body'>
+    <div className="body">
       <div className="container">
         <div className="container-form">
           <div className="user">
-            <i><UserLogin /></i>
+            <i>
+              <UserLogin />
+            </i>
           </div>
           <div className="form">
             <form onSubmit={handleSubmit}>
-              <div className='input-icon input-msg'>
-                <i className='idt'><Identificacion /></i>
+              <div className="input-icon input-msg">
+                <i className="idt">
+                  <Identificacion />
+                </i>
                 <input
                   className="input"
-                  name='identificacion'
+                  name="identificacion"
                   type="text"
                   placeholder="V-Identificación"
                   value={cliente.identificacion}
                   onChange={handleChange}
                 />
-                {idtError && <p className='text-red-500 text-sm'>{idtError}</p>}
+                {idtError && <p className="text-red-500 text-sm">{idtError}</p>}
               </div>
 
-              <div className='input-icon instancia'>
-                <i className='int'><Instancia /></i>
+              <div className="input-icon instancia">
+                <i className="int">
+                  <Instancia />
+                </i>
                 <input
                   className="input"
                   type="text"
@@ -126,23 +139,29 @@ export default function Login() {
                 />
               </div>
 
-              <div className='input-icon input-msg2'>
-                <i className='tel'><Telefono /></i>
+              <div className="input-icon input-msg2">
+                <i className="tel">
+                  <Telefono />
+                </i>
                 <input
                   className="input"
-                  name='telefono'
+                  name="telefono"
                   value={cliente.telefono}
                   onChange={handleChange}
                   type="tel"
                   placeholder="Teléfono"
                 />
-                {telError && <div className='error'>
-                  <p className='text-red-500 text-sm'>{telError}</p>
-                </div>}
+                {telError && (
+                  <div className="error">
+                    <p className="text-red-500 text-sm">{telError}</p>
+                  </div>
+                )}
               </div>
 
-              <div className='input-icon clave'>
-                <i className='cla'><Clave /></i>
+              <div className="input-icon clave">
+                <i className="cla">
+                  <Clave />
+                </i>
                 <input
                   className="input"
                   type="password"
@@ -154,11 +173,7 @@ export default function Login() {
               </div>
 
               <div className="btn">
-                <button 
-                  className="button" 
-                  type="submit"
-                  onClick={handleVerifyClick}
-                >
+                <button className="button" type="submit">
                   Iniciar Sesión
                 </button>
               </div>
@@ -166,21 +181,24 @@ export default function Login() {
           </div>
         </div>
 
-        {
-          verifyOpen && (
-            <div className="modal-verify">
-              <div className="modal-content-verify">
-                <button className="close-button-verify" onClick={closeVerifyModal}>
-                  <CloseModal />
-                </button>
-                <VerifyCode />
-              </div>
+        {verifyOpen && (
+          <div className="modal-verify">
+            <div className="modal-content-verify">
+              <button className="close-button-verify" onClick={closeVerifyModal}>
+                <CloseModal />
+              </button>
+              <VerifyCode />
             </div>
-          )
-        }
+          </div>
+        )}
 
-        <div className='logo'>
-          <Image className='img' src={multishop} alt='logo multishop' priority />
+        <div className="logo">
+          <Image
+            className="img"
+            src={multishop}
+            alt="logo multishop"
+            priority
+          />
         </div>
       </div>
     </div>

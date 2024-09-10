@@ -1,5 +1,3 @@
-'use client'
-
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { ArrowLeft, Sun, Moon } from './Icons'
@@ -17,42 +15,34 @@ const Modal = () => {
   const [darkMode, setDarkMode] = useState(false)
   const [isDataFetched, setIsDataFetched] = useState(false)
   const [chartData, setChartData] = useState([])
-
-  useEffect(() => {
-    const savedDarkMode = localStorage.getItem("darkMode")
-    console.log('Saved dark mode from localStorage:', savedDarkMode) // Verifica qué valor devuelve localStorage
-    if (savedDarkMode !== null) {
-      setDarkMode(JSON.parse(savedDarkMode))
-    }
-  }, [])  
-
+  
   useEffect(() => {
     const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
     setCategory(savedCategory || '')
   }, [router.query.category])
 
   useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode')
+    if (savedDarkMode !== null) {
+      setDarkMode(JSON.parse(savedDarkMode))
+    }
+  }, [])
+
+  useEffect(() => {
     if (darkMode) {
-      document.documentElement.classList.add("dark")
+      document.documentElement.classList.add('dark')
     } else {
-      document.documentElement.classList.remove("dark")
+      document.documentElement.classList.remove('dark')
     }
   }, [darkMode])
 
   const toggleDarkMode = () => {
     const newMode = !darkMode
-    console.log('Toggling dark mode. Current mode:', darkMode)
+    console.log(newMode);
+    
     setDarkMode(newMode)
-    localStorage.setItem("darkMode", JSON.stringify(newMode))
-    
-    console.log('New mode set to:', newMode)
-    
-    if (newMode) {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-    }
-  }  
+    localStorage.setItem('darkMode', JSON.stringify(newMode))
+  }
 
   useEffect(() => {
     if (isDataFetched && chartData.length > 0) {
@@ -131,7 +121,7 @@ const Modal = () => {
 
     try {
       const response = await instance.post('/filter-data', {
-        nombreCliente: 'prueba',
+        nombreCliente: 'yender',
         nombreTabla: 'ventas',
         fechaInicio: from,
         fechaFin: to,
@@ -140,7 +130,8 @@ const Modal = () => {
 
       setChartData(response.data)
       setIsDataFetched(true)
-
+      console.log(response.data)
+      
       router.push('/graph')
     } catch (error) {
       console.error('Error fetching chart data:', error)
@@ -160,27 +151,24 @@ const Modal = () => {
     <div className="body">
       <div className="calendar">
         <div className="nav">
-          <div className="logo-small">
-            <Image
-              src={multishop}
-              className="mutishop"
-              alt="Logo de Multishop"
-            />
+            <div className="logo-small">
+              <Image
+                src={multishop}
+                className="mutishop"
+                alt="Logo de Multishop"
+              />
+            </div>
+            <div className="mood">
+              <button
+                className={`mood-btn ${darkMode ? "dark" : ""}`}
+                onClick={toggleDarkMode}
+              >
+                <Sun className="icon" />
+                <div className="circle2"></div>
+                <Moon className="icon" />
+              </button>
+            </div>
           </div>
-          <div className="mood">
-          <button
-            className={`mood-btn ${darkMode ? "dark" : ""}`}
-            onClick={() => {
-              console.log('Button clicked')
-              toggleDarkMode()
-            }}
-          >
-            <Sun className="icon" />
-            <div className="circle2"></div>
-            <Moon className="icon" />
-          </button>
-          </div>
-        </div>
 
         <div className='modal-ca'>
           <div className='modal-content'>

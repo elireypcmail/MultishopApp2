@@ -12,25 +12,43 @@ import {
 
 const chartConfig = {
   desktop: {
-    label: "Venta",
+    label: "Total",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig
 
 export default function BarChartComponent({ data } : { data: { periodo: string, total_valor: number, promedio_valor: number }[] }) {
   const [selectedGraph, setSelectedGraph] = useState('')
+  const [formattedData, setFormattedData] = useState<{ month: string; value: number }[]>([])
   
   useEffect(() => {
-    const graphName = localStorage.getItem('selectedGraphName')
-    setSelectedGraph(graphName || '')
-  }, [])
-
-  const dataKey = selectedGraph.startsWith("Promedio") ? "promedio_valor" : "total_valor"
-
-  const formattedData = data.map(item => ({
+    console.log(data)
+    
+    const graphName = localStorage.getItem("selectedGraphName")
+    setSelectedGraph(graphName || "")
+  
+    if (data.length > 0) {
+      const dataKey = (graphName || "").startsWith("Promedio") ? "promedio_valor" : "total_valor"
+      const formatted = data.map((item) => ({
+        month: item.periodo,
+        value: parseFloat(item[dataKey].toString()),
+      }))
+      console.log('Formatted Data:', formatted)
+      console.log(dataKey)
+      
+      setFormattedData(formatted)
+      console.log(formatted[0].value)
+      
+    }
+  }, [data])  
+  
+  /* const formattedData = data.map(item => ({
     month: item.periodo,
     value: parseFloat(item[dataKey].toString()), 
-  }))
+  })) */
+
+  console.log(formattedData)
+  console.log(data)
   
   return (
     <Card>
@@ -66,14 +84,14 @@ export default function BarChartComponent({ data } : { data: { periodo: string, 
           </BarChart>
         </ChartContainer>
       </CardContent>
-      {/* <CardFooter className="flex-col items-start gap-2 text-sm">
+      <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
           Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Showing total visitors for the last 6 months
         </div>
-      </CardFooter> */}
+      </CardFooter>
     </Card>
   )
 }
