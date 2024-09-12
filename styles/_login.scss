@@ -4,7 +4,7 @@
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    width: 100%;  /* Ajusta al 100% del ancho del contenedor */
+    width: 100%;  
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -112,7 +112,7 @@
         top: 7px;
         left: 4px;
         color: rgb(11, 11, 11);
-        font-size: 2rem;  /* Ajuste el tamaño de fuente en unidades relativas */
+        font-size: 2rem;  
         border: none;
         padding: 5px 10px;
         cursor: pointer;
@@ -123,21 +123,21 @@
         width: 80%;
         display: flex;
         justify-content: center;
-        margin-top: 3rem;  /* Ajuste la distancia en unidades relativas */
+        margin-top: 3rem;  
       }
     
       .img {
         width: 50%;
-        height: auto;  /* Mantiene la relación de aspecto de la imagen */
+        height: auto;  
       }
     
       .form {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 2rem;  /* Ajuste la distancia en unidades relativas */
-        width: 100%;  /* Ajusta al 100% del ancho del contenedor */
-        height: auto;  /* Ajusta la altura automáticamente */
+        margin-top: 2rem;  
+        width: 100%;  
+        height: auto;  
       }
     
       .input-icon {
@@ -145,34 +145,59 @@
         flex-direction: column;
         width: 100%;
         position: relative;
-        margin-bottom: 1.5rem;  /* Ajuste la distancia en unidades relativas */
+        margin-bottom: 1.5rem;
       }
     
       .input-icon i {
         position: absolute;
-        left: 1.5rem;  /* Ajuste la distancia en unidades relativas */
+        left: 1.5rem; 
         top: 50%;
         transform: translateY(-50%);
-        pointer-events: none;
       }
     
-      .clave, .instancia { margin-top: 1.5rem;  /* Ajuste la distancia en unidades relativas */ }
-    
+      .clave, .instancia { margin-top: 1.5rem;}
+      .input-icon.clave {
+        position: relative;
+      }
+      
+      .input-icon.clave .cla {
+        position: absolute;
+        left: 25px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      
+      .input-icon.clave .input {
+        width: 100%;
+        padding-left: 70px;
+        padding-right: 40px; 
+      }
+      
+      .input-icon.clave .password-toggle {
+        position: absolute;
+        left: 84%; 
+        top: 52%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        padding: 10px; 
+        z-index: 10;
+      }
+
       .input {
         width: 100%;
         border-radius: 20px;
-        padding: 0.5rem 0.5rem 0.5rem 3.5rem;  /* Ajuste el padding en unidades relativas */
+        padding: 0.5rem 0.5rem 0.5rem 3.5rem;  
         border: 1px solid rgba(58, 108, 184, 0.44);
         background: rgba(163, 191, 225, 0.159);
         font-family: text;
-        font-size: 1rem;  /* Ajuste el tamaño de fuente en unidades relativas */
+        font-size: 1rem; 
         color: rgba(30, 30, 30, 0.835);
         height: 5.7vh;
         outline: none;
         box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.057) inset;
         -webkit-box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.072) inset;
         -moz-box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.057) inset;
-        box-sizing: border-box;  /* Asegura que el padding se incluya en el tamaño total del elemento */
+        box-sizing: border-box;  
       }
     
       .input::placeholder { color: rgba(30, 30, 30, 0.835); }
@@ -181,38 +206,38 @@
         display: flex;
         flex-direction: column;
         position: relative;
-        margin-bottom: 1.25rem;  /* Ajuste la distancia en unidades relativas */
+        margin-bottom: 1.25rem; 
       }
     
       .error {
         width: 100%;
         position: absolute;
-        margin-bottom: 2.2rem;  /* Ajuste la distancia en unidades relativas */
+        margin-bottom: 2.2rem;  
       }
     
       .input-msg p, .input-msg2 p {
-        margin-top: 2.8rem;  /* Ajuste la distancia en unidades relativas */
+        margin-top: 2.8rem;  
         color: red;
-        font-size: 0.875rem;  /* Ajuste el tamaño de fuente en unidades relativas */
+        font-size: 0.875rem;  
         position: absolute;
         left: 0;
       }
     
       .btn {
-        margin-top: 2.625rem;  /* Ajuste la distancia en unidades relativas */
-        width: 100%;  /* Ajusta al 100% del ancho del contenedor */
+        margin-top: 2.625rem;  
+        width: 100%; 
         height: 6vh;
       }
     
       .button {
-        width: 100%;  /* Ajusta al 100% del ancho del contenedor */
+        width: 100%;  
         height: 6vh;
         background: #4487B2;
         border-radius: 10px;
         color: rgba(255, 253, 253, 0.88);
         font-family: title;
-        margin-bottom: 1rem;  /* Ajuste la distancia en unidades relativas */
-        font-size: 1rem;  /* Ajuste el tamaño de fuente en unidades relativas */
+        margin-bottom: 1rem;  
+        font-size: 1rem;  
       }
     }
   }

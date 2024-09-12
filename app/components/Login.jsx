@@ -11,9 +11,11 @@ import {
   Telefono,
   Clave,
   CloseModal,
+  HidePassword, 
+  VisiblePassword,  
 } from '@c/Icons'
 import { setCookie } from '@g/cookies'
-import toast, {Toaster} from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function Login() {
   const [cliente, setCliente] = useState({
@@ -27,9 +29,10 @@ export default function Login() {
   const [telError, setTelError] = useState('')
   const [tokenValue, setTokenValue] = useState(null)
   const [verifyOpen, setVerifyOpen] = useState(false)
+  const [showPassword, setShowPassword] = useState(false) 
 
   const notifySucces = (msg) => { toast.success(msg) }
-  const notifyError  = (msg) => { toast.error(msg) }
+  const notifyError = (msg) => { toast.error(msg) }
 
   const { push } = useRouter()
 
@@ -70,16 +73,15 @@ export default function Login() {
         console.log('Token obtenido:', res.tokenCode)
 
         const tokenRes = await verifyToken(res.tokenCode)
-        
         if (tokenRes.message == 'Suscripción activa') {
           setCookie('instancia', cliente.instancia)
-          push('/date') 
-        } else if(tokenRes.message == 'El token ha expirado') {
+          push('/date')
+        } else if (tokenRes.message == 'El token ha expirado') {
           notifyError('Su suscripción ha caducado, comunícate con los administradores.')
         } else {
           console.error('Error al verificar el token:', tokenRes.message)
         }
-      } 
+      }
       console.error('Error en el inicio de sesión:', res.message)
       notifyError(res.message)
     } catch (error) {
@@ -106,9 +108,13 @@ export default function Login() {
     }
   }
 
+  const handlePasswordToggle = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword)
+  }  
+
   return (
     <div className="body">
-      <Toaster position="top-right" reverseOrder={true} duration={5000}/>
+      <Toaster position="top-right" reverseOrder={true} duration={5000} />
       <div className="container">
         <div className="container-form">
           <div className="user">
@@ -159,25 +165,28 @@ export default function Login() {
                   type="tel"
                   placeholder="Teléfono"
                 />
-                {telError && (
+                {/* {telError && (
                   <div className="error">
                     <p className="text-red-500 text-sm">{telError}</p>
                   </div>
-                )}
+                )} */}
               </div>
 
-              <div className="input-icon clave">
+              <div className="input-icon clave" style={{ position: 'relative' }}>
                 <i className="cla">
                   <Clave />
                 </i>
                 <input
                   className="input"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'} 
                   placeholder="Clave"
                   value={cliente.clave}
                   onChange={handleChange}
                   name="clave"
                 />
+                <i className="password-toggle" onClick={handlePasswordToggle}>
+                  {showPassword ? <VisiblePassword /> : <HidePassword />}
+                </i>
               </div>
 
               <div className="btn">
@@ -201,12 +210,7 @@ export default function Login() {
         )}
 
         <div className="logo">
-          <Image
-            className="img"
-            src={multishop}
-            alt="logo multishop"
-            priority
-          />
+          <Image className="img" src={multishop} alt="logo multishop" priority />
         </div>
       </div>
     </div>
