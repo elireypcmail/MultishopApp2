@@ -6,8 +6,17 @@ import {
   Graph,
   Logout
 } from "./Icons"
+import { removeCookie } from "@g/cookies"
+import { useRouter } from "next/router"
 
 export default function FooterGraph() {
+  const { push } = useRouter()
+
+  const logout = () => {
+    removeCookie('instancia')
+    push('/')
+  }
+
   return(
     <footer className="menu">
       <div className="menu-item">
@@ -31,10 +40,8 @@ export default function FooterGraph() {
             <Graph />
           </Link>
         </span>
-        <span className="link">
-          <Link href={'/'}>
-            <Logout />
-          </Link>
+        <span className="link" onClick={ logout }>
+          <Logout />
         </span>
       </div>
     </footer>

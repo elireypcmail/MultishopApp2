@@ -42,7 +42,7 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
 
   return (
     <div className={`modal-type ${closing ? 'fade-out' : 'fade-in'}`}>
-      <div className={`modal-content ${closing ? 'fade-out' : 'fade-in'}`}>
+      <div className={`modal-content-type ${closing ? 'fade-out' : 'fade-in'}`}>
         <span className="close-button" onClick={handleClose}>
           <CloseModal />
         </span>

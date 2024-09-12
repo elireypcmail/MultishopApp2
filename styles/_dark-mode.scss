@@ -141,7 +141,14 @@
 
     .modal-ca, .modal-type{
       .modal-content{
-        background: rgba(255, 255, 255, 0.067);
+        background: rgba(24, 24, 24, 0.116);
+        border: 1px solid rgba(255, 255, 255, 0.088);
+      }
+    }
+
+    .modal-ca, .modal-type{
+      .modal-content-type{
+        background: rgb(24, 24, 24);
         border: 1px solid rgba(255, 255, 255, 0.088);
       }
 

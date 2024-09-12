@@ -1,4 +1,3 @@
-// Login.js
 import { useState } from 'react'
 import Image from 'next/image'
 import multishop from '@p/Logo Sistema Multishop Pequeno.png'
@@ -13,6 +12,8 @@ import {
   Clave,
   CloseModal,
 } from '@c/Icons'
+import { setCookie } from '@g/cookies'
+import toast, {Toaster} from 'react-hot-toast'
 
 export default function Login() {
   const [cliente, setCliente] = useState({
@@ -26,6 +27,9 @@ export default function Login() {
   const [telError, setTelError] = useState('')
   const [tokenValue, setTokenValue] = useState(null)
   const [verifyOpen, setVerifyOpen] = useState(false)
+
+  const notifySucces = (msg) => { toast.success(msg) }
+  const notifyError  = (msg) => { toast.error(msg) }
 
   const { push } = useRouter()
 
@@ -63,18 +67,21 @@ export default function Login() {
     try {
       const res = await loginUser(cliente)
       if (res?.tokenCode) {
+        console.log('Token obtenido:', res.tokenCode)
+
         const tokenRes = await verifyToken(res.tokenCode)
-        if (tokenRes?.success) {
-          setTokenValue(tokenRes.token)
-          console.log('Token obtenido:', tokenRes.token)
-          // Redirigir al usuario a la página principal o dashboard
-          push('/dashboard')
+        
+        if (tokenRes.message == 'Suscripción activa') {
+          setCookie('instancia', cliente.instancia)
+          push('/date') 
+        } else if(tokenRes.message == 'El token ha expirado') {
+          notifyError('Su suscripción ha caducado, comunícate con los administradores.')
         } else {
           console.error('Error al verificar el token:', tokenRes.message)
         }
-      } else {
-        console.error('Error en el inicio de sesión:', res.message)
-      }
+      } 
+      console.error('Error en el inicio de sesión:', res.message)
+      notifyError(res.message)
     } catch (error) {
       console.error('Error en la solicitud:', error)
     }
@@ -101,6 +108,7 @@ export default function Login() {
 
   return (
     <div className="body">
+      <Toaster position="top-right" reverseOrder={true} duration={5000}/>
       <div className="container">
         <div className="container-form">
           <div className="user">

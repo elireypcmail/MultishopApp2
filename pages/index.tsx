@@ -4,6 +4,6 @@ import Category from '@c/Category'
 
 export default function Home() {
   return (
-    <Date />
+    <Login />
   )
 }
