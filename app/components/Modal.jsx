@@ -6,6 +6,7 @@ import Image from "next/image"
 import FooterGraph from './Footer'
 import instance from '@g/api'
 import { defaultChartTypes } from '@conf/defaultChartTypes'
+import { getCookie } from '@a/globals/cookies'
 
 const Modal = () => {
   const router = useRouter()
@@ -15,6 +16,7 @@ const Modal = () => {
   const [darkMode, setDarkMode] = useState(false)
   const [isDataFetched, setIsDataFetched] = useState(false)
   const [chartData, setChartData] = useState([])
+  const [instanciaUser, setInstanciaUser] = useState('')
   
   useEffect(() => {
     const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
@@ -25,6 +27,13 @@ const Modal = () => {
     const savedDarkMode = localStorage.getItem('darkMode')
     if (savedDarkMode !== null) {
       setDarkMode(JSON.parse(savedDarkMode))
+    }
+
+    const cookieValue = getCookie('instancia')
+    const [ prefix, base, number ] = cookieValue.split('_')
+    if (cookieValue) {
+      setInstanciaUser(prefix)
+      console.log('Valor de la cookie instancia:', cookieValue)
     }
   }, [])
 
@@ -116,18 +125,23 @@ const Modal = () => {
   }  
 
   const handleFetchChartData = async () => {
+    if (!instanciaUser) {
+      console.log('instanciaUser no está disponible aún.')
+      return
+    }
+  
     const dateRange = JSON.parse(localStorage.getItem('dateRange'))
     const { from, to } = dateRange
-
+  
     try {
       const response = await instance.post('/filter-data', {
-        nombreCliente: 'yender',
+        nombreCliente: instanciaUser, 
         nombreTabla: 'ventas',
         fechaInicio: from,
         fechaFin: to,
         kpi: localStorage.getItem('selectedGraph'),
       })
-
+  
       setChartData(response.data)
       setIsDataFetched(true)
       console.log(response.data)
@@ -136,7 +150,7 @@ const Modal = () => {
     } catch (error) {
       console.error('Error fetching chart data:', error)
     }
-  }
+  }  
 
   const handleSearchGraph = async (e) => {
     e.preventDefault()
