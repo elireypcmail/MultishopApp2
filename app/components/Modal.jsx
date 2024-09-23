@@ -32,7 +32,7 @@ const Modal = () => {
     const cookieValue = getCookie('instancia')
     const [ prefix, base, number ] = cookieValue.split('_')
     if (cookieValue) {
-      setInstanciaUser(prefix)
+      setInstanciaUser(cookieValue)
       console.log('Valor de la cookie instancia:', cookieValue)
     }
   }, [])
@@ -70,41 +70,40 @@ const Modal = () => {
     switch (category) {
       case 'Financieros':
         return [
-          { name: 'Totales Generales de Venta', value: 'total_totalventa' },
-          { name: 'Promedio Diario de Venta', value: 'promedio_totalventa' },
-          { name: 'Totales Generales de Utilidad', value: 'total_totalut' },
+          { name: 'Ventas en USD', value: 'totalventa' },
+          { name: 'Utilidad', value: 'totalut' },
+          { name: 'Ticket de Venta', value: 'valor_tp' },
+          { name: 'Costo de Venta', value: 'totalcosto' },
+          { name: 'Margen de Utilidad', value: 'porcentajedeutilidad' },
+          /* { name: 'Promedio Diario de Ventas en USD', value: 'promedio_totalventa' },
           { name: 'Promedio Diario de Utilidad', value: 'promedio_totalut' },
-          { name: 'Totales Generales de Valor Ticket de Venta', value: 'total_valor_tp' },
-          { name: 'Promedio Diario de Valor Ticket de Venta', value: 'promedio_valor_tp' },
-          { name: 'Totales Generales de Costos de Venta', value: 'total_totalcosto' },
-          { name: 'Promedio Diario de Costos de Venta', value: 'promedio_totalcosto' },
-          /* { name: 'Totales Generales de Porcentaje de Utilidad', value: 'total_porcentajedeutilidad' },
-          { name: 'Promedio Diario de Porcentaje de Utilidad', value: 'promedio_porcentajedeutilidad' }, */
-          { name: 'Promedio Diario de Margen de Ganancia', value: 'promedio_margendeldia' },
+          { name: 'Promedio Diario de Ticket de Venta', value: 'promedio_valor_tp' },
+          { name: 'Promedio Diario de Costo de Venta', value: 'promedio_totalcosto' },
+          { name: 'Promedio Diario de Margen de Utilidad', value: 'promedio_porcentajedeutilidad' }, */
         ]
       case 'Operativos':
         return [
-          { name: 'Totales Generales de Unidades Vendidas', value: 'total_cantidadund' },
-          { name: 'Promedio Diario de Unidades Vendidas', value: 'promedio_cantidadund' },
-          { name: 'Totales Generales de Facturas Emitidas', value: 'total_cantidadfac' },
+          { name: 'Unidades Vendidas', value: 'cantidadund' },
+          { name: 'Facturas Emitidas', value: 'cantidadfac' },
+          { name: 'Unidades en Bolsa', value: 'valor_uxb' },
+          { name: 'Valor Promedio de la Unidad', value: 'valor_up' },
+          { name: 'Clientes Atendidos', value: 'clientesa' },
+          { name: 'Clientes Frecuentes', value: 'clientesf' },
+          { name: 'Clientes Nuevos', value: 'clientesn' },
+          /* { name: 'Promedio Diario de Unidades Vendidas', value: 'promedio_cantidadund' },
           { name: 'Promedio Diario de Facturas Emitidas', value: 'promedio_cantidadfac' },
-          { name: 'Totales Generales de Unidades en Bolsa', value: 'total_valor_uxb' },
           { name: 'Promedio Diario de Unidades en Bolsa', value: 'promedio_valor_uxb' },
-          { name: 'Totales Generales de Valor Promedio de la Unidad', value: 'total_valor_up' },
           { name: 'Promedio Diario de Valor Promedio de la Unidad', value: 'promedio_valor_up' },
-          { name: 'Totales Generales de Clientes Atendidos', value: 'total_clientesa' },
           { name: 'Promedio Diario de Clientes Atendidos', value: 'promedio_clientesa' },
-          { name: 'Totales Generales de Clientes Frecuentes', value: 'total_clientesf' },
           { name: 'Promedio Diario de Clientes Frecuentes', value: 'promedio_clientesf' },
-          { name: 'Totales Generales de Clientes Nuevos', value: 'total_clientesn' },
-          { name: 'Promedio Diario de Clientes Nuevos', value: 'promedio_clientesn' },
+          { name: 'Promedio Diario de Clientes Nuevos', value: 'promedio_clientesn' }, */
         ]
       case 'Estadísticos':
         return [
           { name: 'Día más Exitoso', value: 'total_diamassexitoso' },
           { name: 'Venta más Exitosa', value: 'total_ventamasexitosa' },
-          { name: 'Ranking de 5 Operadores más Productivos', value: 'total_rankingoperadores' },
-          { name: 'Ranking de 5 Fabricantes más Vendidos', value: 'total_rankingfabricantes' },
+          { name: 'Cajeros con más Venta', value: 'total_rankingoperadores' },
+          { name: 'Fabricantes con más Ventas', value: 'total_rankingfabricantes' },
         ]
       default:
         return []
@@ -112,9 +111,7 @@ const Modal = () => {
   }
 
   const handleItemClick = (graph) => {
-    const baseValue = graph.value.replace(/^(total_|promedio_)/, '')
-    
-    localStorage.setItem('selectedGraph', baseValue)
+    localStorage.setItem('selectedGraph', graph.value)
     localStorage.setItem('selectedGraphName', graph.name)
     
     setCurrentSelectedGraph(graph.value)

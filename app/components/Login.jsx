@@ -19,10 +19,7 @@ import toast, { Toaster } from 'react-hot-toast'
 
 export default function Login() {
   const [cliente, setCliente] = useState({
-    identificacion: '',
-    instancia: '',
-    correo: '',
-    telefono: '',
+    login_user: '',
     clave: '',
   })
   const [idtError, setIdtError] = useState('')
@@ -69,12 +66,14 @@ export default function Login() {
     e.preventDefault()
     try {
       const res = await loginUser(cliente)
+      console.log(res);
+      
       if (res?.tokenCode) {
         console.log('Token obtenido:', res.tokenCode)
 
         const tokenRes = await verifyToken(res.tokenCode)
         if (tokenRes.message == 'Suscripción activa') {
-          setCookie('instancia', cliente.instancia)
+          setCookie('instancia', res.identificacion)
           push('/date')
         } else if (tokenRes.message == 'El token ha expirado') {
           notifyError('Su suscripción ha caducado, comunícate con los administradores.')
@@ -124,7 +123,7 @@ export default function Login() {
           </div>
           <div className="form">
             <form onSubmit={handleSubmit}>
-              <div className="input-icon input-msg">
+              {/* <div className="input-icon input-msg">
                 <i className="idt">
                   <Identificacion />
                 </i>
@@ -137,23 +136,23 @@ export default function Login() {
                   onChange={handleChange}
                 />
                 {idtError && <p className="text-red-500 text-sm">{idtError}</p>}
-              </div>
+              </div> */}
 
               <div className="input-icon instancia">
                 <i className="int">
-                  <Instancia />
+                  <Identificacion />
                 </i>
                 <input
                   className="input"
                   type="text"
-                  placeholder="Instancia"
-                  value={cliente.instancia}
+                  placeholder="Nombre de usuario"
+                  value={cliente.login_user}
                   onChange={handleChange}
-                  name="instancia"
+                  name="login_user"
                 />
               </div>
 
-              <div className="input-icon input-msg2">
+              {/*<div className="input-icon input-msg2">
                 <i className="tel">
                   <Telefono />
                 </i>
@@ -165,12 +164,12 @@ export default function Login() {
                   type="tel"
                   placeholder="Teléfono"
                 />
-                {/* {telError && (
+                 {telError && (
                   <div className="error">
                     <p className="text-red-500 text-sm">{telError}</p>
                   </div>
-                )} */}
-              </div>
+                )} 
+              </div>*/}
 
               <div className="input-icon clave" style={{ position: 'relative' }}>
                 <i className="cla">

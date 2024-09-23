@@ -84,7 +84,12 @@
       }
 
       .recharts-responsive-container{
-        min-height: 45vh;
+        margin-top: 19px;
+        min-height: 42vh;
+      }
+
+      .recharts-surface, .recharts-wrapper{
+        min-height: 40vh;
       }
 
       .button__graph{

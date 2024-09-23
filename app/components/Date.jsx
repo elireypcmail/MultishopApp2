@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react"
 import { ArrowRight, Sun, Moon } from "./Icons"
 import { addDays } from "date-fns"
 import { DayPicker } from "react-day-picker"
+import { es } from 'date-fns/locale'
 import multishop from "@p/Logo Sistema Multishop Pequeno.png"
 import Image from "next/image"
 import FooterGraph from "./Footer"
@@ -86,7 +87,12 @@ export default function DateComponent() {
         </div>
         <div className="range">
           <div className="range-date">
-            <DayPicker mode="range" selected={range} onSelect={setRange} />
+            <DayPicker 
+              mode="range" 
+              selected={range} 
+              onSelect={setRange} 
+              locale={es}
+            />
           </div>
         </div>
         <div className="footer2">
