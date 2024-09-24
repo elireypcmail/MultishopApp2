@@ -10,6 +10,7 @@ import {
 } from './Icons'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
+import { ArrowLeft } from './Icons'
 import multishop from '@p/Logo Sistema Multishop Pequeno.png'
 import FooterGraph from './Footer'
 
@@ -52,6 +53,11 @@ export default function Category() {
       pathname: '/listkpi',
       query: { category }
     })
+  }
+
+  const backRouter = (e) => {
+    e.preventDefault()
+    router.push('/date')
   }
 
   return (
@@ -105,7 +111,15 @@ export default function Category() {
               <span className='ca-ti'>Análisis Estadístico</span>
             </div>
           </div>
+          
+          <div className="button__graph">
+            <button className='btn' onClick={backRouter}>
+              <ArrowLeft></ArrowLeft>
+              <span>Atrás</span>
+            </button>
+          </div>
         </div>
+
 
         <FooterGraph />
       </div>

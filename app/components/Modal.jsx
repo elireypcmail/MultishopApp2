@@ -138,16 +138,22 @@ const Modal = () => {
         fechaFin: to,
         kpi: localStorage.getItem('selectedGraph'),
       })
-  
-      setChartData(response.data)
+
+      const chartDataWithDateRange = {
+        ...response.data,
+        dateRange: { from, to }
+      }
+
+      localStorage.setItem('chartData', JSON.stringify(chartDataWithDateRange))
+      setChartData(chartDataWithDateRange)
       setIsDataFetched(true)
-      console.log(response.data)
+      console.log(chartDataWithDateRange)
       
       router.push('/graph')
     } catch (error) {
       console.error('Error fetching chart data:', error)
     }
-  }  
+  }
 
   const handleSearchGraph = async (e) => {
     e.preventDefault()
@@ -201,7 +207,7 @@ const Modal = () => {
             </ul>
             <div className="save-button-container">
               <button onClick={handleClose}>Atrás</button>
-              <button onClick={handleSearchGraph} disabled={!currentSelectedGraph}>Buscar</button>
+              <button onClick={handleSearchGraph} disabled={!currentSelectedGraph}>Graficar</button>
             </div>
           </div>
         </div>

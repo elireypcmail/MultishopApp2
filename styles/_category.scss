@@ -69,6 +69,34 @@
         font-size: 16px;
       }
     }
+
+    .button__graph{
+      display: flex;
+      flex-direction: row;
+      position: absolute;
+      width: 90%;
+      height: 40px;
+      top: 83%;
+
+      .btn{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #4487B2;
+        width: 35%;
+        color: white;
+        font-family: title;
+        font-size: 17px;
+        border: none;
+        cursor: pointer;
+        border-radius: 10px;
+      }
+
+      span{
+        margin-left: 5px;
+        margin-top: 1px;
+      }
+    }
   }
 
   .footer2-ca {

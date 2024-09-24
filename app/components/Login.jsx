@@ -28,8 +28,9 @@ export default function Login() {
   const [verifyOpen, setVerifyOpen] = useState(false)
   const [showPassword, setShowPassword] = useState(false) 
 
-  const notifySucces = (msg) => { toast.success(msg) }
-  const notifyError = (msg) => { toast.error(msg) }
+  const notifySucces  = (msg) => { toast.success(msg) }
+  const notifyWarning = (msg) => { toast.warn(msg) }
+  const notifyError   = (msg) => { toast.error(msg) }
 
   const { push } = useRouter()
 
@@ -53,37 +54,34 @@ export default function Login() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setCliente({ ...cliente, [name]: value })
-    if (name === 'identificacion') {
-      validarIdentificacion(value)
-    }
-    if (name === 'telefono') {
-      validarTelefono(value)
-    }
-  }
+    setCliente({
+      ...cliente,
+      [name]: value.toUpperCase(), 
+    })
+  }  
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       const res = await loginUser(cliente)
-      console.log(res);
-      
       if (res?.tokenCode) {
-        console.log('Token obtenido:', res.tokenCode)
-
         const tokenRes = await verifyToken(res.tokenCode)
         if (tokenRes.message == 'Suscripción activa') {
           setCookie('instancia', res.identificacion)
-          push('/date')
+          notifySucces('Haz iniciado sesión!')
+
+          setTimeout(() => {
+            push('/date')
+          }, 3000)
         } else if (tokenRes.message == 'El token ha expirado') {
           notifyError('Su suscripción ha caducado, comunícate con los administradores.')
-        } else {
+        } else if(tokenRes.message.startsWith('A partir de hoy te quedan')) {
           console.error('Error al verificar el token:', tokenRes.message)
         }
       }
-      console.error('Error en el inicio de sesión:', res.message)
       notifyError(res.message)
     } catch (error) {
+      notifyError(error?.response?.data?.message)
       console.error('Error en la solicitud:', error)
     }
   }

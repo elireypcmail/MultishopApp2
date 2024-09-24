@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useEffect, useState, useRef } from "react"
 import { TrendingUp } from "lucide-react"
@@ -15,6 +15,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@comp/chart"
+import { AlertModal } from "./AlertModal"
 
 const chartConfig = {
   desktop: {
@@ -41,41 +42,78 @@ const isWithin15Days = (dates: string[]) => {
   return diffDays <= 15;
 }
 
-export default function LineChartComponent({ data }: { data: { periodo: string, total_valor: number, promedio_valor: number }[] }) {
+interface DataItem {
+  periodo: string;
+  total_valor: string;
+  promedio_valor: string;
+}
+
+interface LineChartComponentProps {
+  data: {
+    results: DataItem[];
+    promedioTotal: string;
+  };
+  dateRange: { from: string; to: string };
+}
+
+export default function LineChartComponent({ data, dateRange }: LineChartComponentProps) {
   const [formattedData, setFormattedData] = useState<{ month: string; total: number; promedio: number }[]>([])
   const [legendText, setLegendText] = useState<string[]>([])
   const [name, setName] = useState('')
   const [showAverage, setShowAverage] = useState(true)
   const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 300 })
+  const [missingDataMessage, setMissingDataMessage] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    console.log('Original data:', data)
+    console.log('LineChartComponent: Received data:', data)
     
-    if (data.length > 0) {
-      const sortedData = data.sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime());
+    const graphName = localStorage.getItem("selectedGraphName")
+    setName(graphName || '')
+  
+    if (data && data.results && Array.isArray(data.results) && data.results.length > 0) {
+      console.log('LineChartComponent: Processing data...')
+      const sortedData = data.results.sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime());
       
-      const formatted = sortedData.map(item => ({
-        month: item.periodo,
-        total: parseFloat(item.total_valor.toString()),
-        promedio: parseFloat(item.promedio_valor.toString()),
-      }));
+      const allDates = getAllDatesInRange(new Date(dateRange.from), new Date(dateRange.to));
+      const formatted = allDates.map(date => {
+        const dateString = date.toISOString().split('T')[0];
+        const dataPoint = sortedData.find(item => item.periodo === dateString);
+        return {
+          month: dateString,
+          total: dataPoint ? parseFloat(dataPoint.total_valor) : 0,
+          promedio: dataPoint ? parseFloat(dataPoint.promedio_valor) : 0,
+        };
+      });
 
-      console.log('Formatted Data:', formatted)
+      const isWithin15DaysRange = isWithin15Days(sortedData.map(item => item.periodo))
       
-      setFormattedData(formatted)
-      
-      const isWithin15DaysRange = isWithin15Days(data.map(item => item.periodo))
-      setShowAverage(isWithin15DaysRange)
+      // Filter out dates without data if more than 15 days are selected
+      const filteredData = isWithin15DaysRange ? formatted : formatted.filter(item => item.total > 0);
 
-      setLegendText(formatted.map(item => {
+      console.log('LineChartComponent: Formatted Data:', filteredData)
+      
+      setFormattedData(filteredData)
+      setShowAverage(!isWithin15DaysRange)
+
+      setLegendText(filteredData.map(item => {
         return `${item.month}: ${isNaN(item.promedio) ? 'N/A' : formatNumber(item.promedio)}`
       }))
-    }
 
-    const name = localStorage.getItem('selectedGraphName')
-    setName(name || '')
-  }, [data])
+      // Check for missing data
+      const missingDates = formatted.filter(item => item.total === 0).map(item => item.month);
+      if (missingDates.length > 0 && !isWithin15DaysRange) {
+        setMissingDataMessage(`No hay datos disponibles para las siguientes fechas: ${missingDates.join(', ')}`);
+      } else {
+        setMissingDataMessage(null);
+      }
+    } else {
+      console.warn('LineChartComponent: Invalid or empty data received')
+      setFormattedData([])
+      setLegendText([])
+      setMissingDataMessage('No hay datos disponibles para el rango de fechas seleccionado.');
+    }
+  }, [data, dateRange])
 
   useEffect(() => {
     const updateChartDimensions = () => {
@@ -91,72 +129,81 @@ export default function LineChartComponent({ data }: { data: { periodo: string, 
     return () => window.removeEventListener('resize', updateChartDimensions)
   }, [])
   
-  console.log('Final formatted data:', formattedData)
-  console.log('Show Average:', showAverage)
+  console.log('LineChartComponent: Final formatted data:', formattedData)
+  console.log('LineChartComponent: Show Average:', showAverage)
   
+  if (!data || !data.results || data.results.length === 0) {
+    return <div>No hay datos disponibles para mostrar.</div>
+  }
+
   return (
-    <Card ref={cardRef}>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            width={chartDimensions.width}
-            height={chartDimensions.height}
-            data={formattedData}
-            margin={{
-              left: 0,
-              right: 0,
-              top: 20,
-              bottom: 60,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={30}
-              angle={-45}
-              textAnchor="end"
-              interval={0}
-              tick={{ fontSize: 10 }}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="line" />}
-            />
-            <Line
-              dataKey="total"
-              type="natural"
-              stroke="var(--color-desktop)"
-              strokeWidth={2}
-              dot={{
-                fill: "var(--color-desktop)",
+    <>
+      <AlertModal message={missingDataMessage} />
+      <Card ref={cardRef}>
+        <CardContent>
+          <ChartContainer config={chartConfig}>
+            <LineChart
+              width={chartDimensions.width}
+              height={chartDimensions.height}
+              data={formattedData}
+              margin={{
+                left: 0,
+                right: 0,
+                top: 20,
+                bottom: 60,
               }}
-              activeDot={{
-                r: 6,
-              }}
-            />
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-      {showAverage && (
+            >
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={30}
+                angle={-45}
+                textAnchor="end"
+                interval={0}
+                tick={{ fontSize: 10 }}
+              />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="line" />}
+              />
+              <Line
+                dataKey="total"
+                type="monotone"
+                stroke="var(--color-desktop)"
+                strokeWidth={2}
+                dot={{
+                  fill: "var(--color-desktop)",
+                }}
+                activeDot={{
+                  r: 6,
+                }}
+              />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
         <CardFooter className="flex-col items-start gap-2 text-sm">
           <div className="flex gap-2 font-medium leading-none">
             Promedio diario de {name} <TrendingUp className="h-4 w-4" />
           </div>
-          <div className="leading-none text-muted-foreground">
-            {legendText.map((text, index) => (
-              <div key={index} className="flex items-center gap-2 mt-1">
-                <span 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: `hsl(210, 100%, ${Math.max(35, 50 - index * (30 / (legendText.length - 1)))}%)` }}
-                ></span>
-                {text}
-              </div>
-            ))}
+          <div className="mt-2 font-semibold">
+            Promedio Total: {formatNumber(parseFloat(data.promedioTotal))}
           </div>
         </CardFooter>
-      )}
-    </Card>
+      </Card>
+    </>
   )
+}
+
+function getAllDatesInRange(startDate: Date, endDate: Date) {
+  const dates = [];
+  let currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    dates.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return dates;
 }
