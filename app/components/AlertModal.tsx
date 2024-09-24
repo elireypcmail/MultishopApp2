@@ -29,8 +29,10 @@ export const AlertModal: React.FC<AlertModalProps> = ({ message, duration = 3000
           transition={{ duration: 0.3 }}
           className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
         >
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-lg">
-            <p>{message}</p>
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-lg max-w-md w-full">
+            <div className="max-h-40 overflow-y-auto pr-2">
+              <p className="text-sm">{message}</p>
+            </div>
           </div>
         </motion.div>
       )}

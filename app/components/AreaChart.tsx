@@ -32,16 +32,6 @@ const formatNumber = (value: number) => {
   }).format(value);
 }
 
-const isWithin15Days = (dates: string[]) => {
-  if (dates.length < 2) return true;
-  const sortedDates = dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  const firstDate = new Date(sortedDates[0]);
-  const lastDate = new Date(sortedDates[sortedDates.length - 1]);
-  const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= 15;
-}
-
 interface DataItem {
   periodo: string;
   total_valor: string;
@@ -57,10 +47,8 @@ interface LineChartComponentProps {
 }
 
 export default function LineChartComponent({ data, dateRange }: LineChartComponentProps) {
-  const [formattedData, setFormattedData] = useState<{ month: string; total: number; promedio: number }[]>([])
-  const [legendText, setLegendText] = useState<string[]>([])
+  const [formattedData, setFormattedData] = useState<{ period: string; total: number; promedio: number }[]>([])
   const [name, setName] = useState('')
-  const [showAverage, setShowAverage] = useState(true)
   const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 300 })
   const [missingDataMessage, setMissingDataMessage] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -75,34 +63,23 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
       console.log('LineChartComponent: Processing data...')
       const sortedData = data.results.sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime());
       
-      const allDates = getAllDatesInRange(new Date(dateRange.from), new Date(dateRange.to));
-      const formatted = allDates.map(date => {
-        const dateString = date.toISOString().split('T')[0];
-        const dataPoint = sortedData.find(item => item.periodo === dateString);
-        return {
-          month: dateString,
-          total: dataPoint ? parseFloat(dataPoint.total_valor) : 0,
-          promedio: dataPoint ? parseFloat(dataPoint.promedio_valor) : 0,
-        };
-      });
+      const formatted = sortedData.map(item => ({
+        period: item.periodo,
+        total: parseFloat(item.total_valor),
+        promedio: parseFloat(item.promedio_valor),
+      }));
 
-      const isWithin15DaysRange = isWithin15Days(sortedData.map(item => item.periodo))
+      console.log('LineChartComponent: Formatted Data:', formatted)
       
-      // Filter out dates without data if more than 15 days are selected
-      const filteredData = isWithin15DaysRange ? formatted : formatted.filter(item => item.total > 0);
-
-      console.log('LineChartComponent: Formatted Data:', filteredData)
-      
-      setFormattedData(filteredData)
-      setShowAverage(!isWithin15DaysRange)
-
-      setLegendText(filteredData.map(item => {
-        return `${item.month}: ${isNaN(item.promedio) ? 'N/A' : formatNumber(item.promedio)}`
-      }))
+      setFormattedData(formatted)
 
       // Check for missing data
-      const missingDates = formatted.filter(item => item.total === 0).map(item => item.month);
-      if (missingDates.length > 0 && !isWithin15DaysRange) {
+      const allDates = getAllDatesInRange(new Date(dateRange.from), new Date(dateRange.to));
+      const missingDates = allDates.filter(date => 
+        !formatted.some(item => item.period === date.toISOString().split('T')[0])
+      ).map(date => date.toISOString().split('T')[0]);
+
+      if (missingDates.length > 0) {
         setMissingDataMessage(`No hay datos disponibles para las siguientes fechas: ${missingDates.join(', ')}`);
       } else {
         setMissingDataMessage(null);
@@ -110,7 +87,6 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
     } else {
       console.warn('LineChartComponent: Invalid or empty data received')
       setFormattedData([])
-      setLegendText([])
       setMissingDataMessage('No hay datos disponibles para el rango de fechas seleccionado.');
     }
   }, [data, dateRange])
@@ -130,7 +106,6 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
   }, [])
   
   console.log('LineChartComponent: Final formatted data:', formattedData)
-  console.log('LineChartComponent: Show Average:', showAverage)
   
   if (!data || !data.results || data.results.length === 0) {
     return <div>No hay datos disponibles para mostrar.</div>
@@ -155,7 +130,7 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
             >
               <CartesianGrid vertical={false} />
               <XAxis
-                dataKey="month"
+                dataKey="period"
                 tickLine={false}
                 axisLine={false}
                 tickMargin={30}

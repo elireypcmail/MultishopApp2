@@ -39,16 +39,6 @@ const formatNumber = (value: number) => {
   }).format(value);
 }
 
-const isWithin15Days = (dates: string[]) => {
-  if (dates.length < 2) return true;
-  const sortedDates = dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  const firstDate = new Date(sortedDates[0]);
-  const lastDate = new Date(sortedDates[sortedDates.length - 1]);
-  const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays <= 15;
-}
-
 interface DataItem {
   periodo: string;
   total_valor: string;
@@ -65,7 +55,6 @@ interface PieChartComponentProps {
 
 export default function PieChartComponent({ data, dateRange }: PieChartComponentProps) {
   const [formattedData, setFormattedData] = React.useState<{ period: string; value: number; fill: string }[]>([])
-  const [legendText, setLegendText] = React.useState<string[]>([])
   const [name, setName] = React.useState('')
   const [activePeriod, setActivePeriod] = React.useState('')
   const [chartDimensions, setChartDimensions] = React.useState({ width: 0, height: 0 })
@@ -83,32 +72,27 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
       const sortedData = data.results.sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime());
       const blueShades = generateBlueShades(sortedData.length)
       
-      const allDates = getAllDatesInRange(new Date(dateRange.from), new Date(dateRange.to));
-      const formatted = allDates.map(date => {
-        const dateString = date.toISOString().split('T')[0];
-        const dataPoint = sortedData.find(item => item.periodo === dateString);
-        return {
-          period: dateString,
-          value: dataPoint ? parseFloat(dataPoint.total_valor) : 0,
-          fill: dataPoint ? blueShades[sortedData.indexOf(dataPoint)] : 'hsl(210, 100%, 90%)', // Lighter shade for missing data
-        };
-      });
+      const formatted = sortedData.map((item, index) => ({
+        period: item.periodo,
+        value: parseFloat(item.total_valor),
+        fill: blueShades[index],
+      }));
 
-      const isWithin15DaysRange = isWithin15Days(sortedData.map(item => item.periodo))
+      console.log('PieChartComponent: Formatted Data:', formatted)
       
-      // Filter out dates without data if more than 15 days are selected
-      const filteredData = isWithin15DaysRange ? formatted : formatted.filter(item => item.value > 0);
-
-      console.log('PieChartComponent: Formatted Data:', filteredData)
+      // Filter out zero values
+      const filteredData = formatted.filter(item => item.value > 0);
       
       setFormattedData(filteredData)
-      setActivePeriod(filteredData[0].period)
-      
-      setLegendText(filteredData.map(item => `${item.period}: ${formatNumber(item.value)}`))
+      setActivePeriod(filteredData[0]?.period || '')
 
       // Check for missing data
-      const missingDates = formatted.filter(item => item.value === 0).map(item => item.period);
-      if (missingDates.length > 0 && !isWithin15DaysRange) {
+      const allDates = getAllDatesInRange(new Date(dateRange.from), new Date(dateRange.to));
+      const missingDates = allDates.filter(date => 
+        !formatted.some(item => item.period === date.toISOString().split('T')[0])
+      ).map(date => date.toISOString().split('T')[0]);
+
+      if (missingDates.length > 0) {
         setMissingDataMessage(`No hay datos disponibles para las siguientes fechas: ${missingDates.join(', ')}`);
       } else {
         setMissingDataMessage(null);
@@ -116,7 +100,6 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
     } else {
       console.warn('PieChartComponent: Invalid or empty data received')
       setFormattedData([])
-      setLegendText([])
       setMissingDataMessage('No hay datos disponibles para el rango de fechas seleccionado.');
     }
   }, [data, dateRange])
@@ -226,7 +209,8 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
                         {`${formatNumber(value ?? 0)}`}
                       </text>
                       <text 
-                        x={ex + (cos >= 0 ? 1 : -1) * 12} 
+                        x={ex + (cos >= 0 ?
+ 1 : -1) * 12} 
                         y={ey} 
                         dy={18} 
                         textAnchor={textAnchor} 
