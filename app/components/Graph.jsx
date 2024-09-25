@@ -16,6 +16,7 @@ export default function Graph() {
   const [dateGraph, setDateGraph] = useState('')
   const [currentGraphType, setCurrentGraphType] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false) 
+  const [noDataMessage, setNoDataMessage] = useState('')
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true'
@@ -37,6 +38,13 @@ export default function Graph() {
 
   const loadChartData = () => {
     const storedChartData = localStorage.getItem('chartData')
+    const storedNoDataMessage = localStorage.getItem('noDataMessage')
+    
+    if (storedNoDataMessage) {
+      setNoDataMessage(storedNoDataMessage)
+      localStorage.removeItem('noDataMessage')
+    }
+    
     if (storedChartData) {
       try {
         const parsedData = JSON.parse(storedChartData)
@@ -44,6 +52,7 @@ export default function Graph() {
         setChartDataState(parsedData)
       } catch (error) {
         console.error('Error parsing chart data:', error)
+        setNoDataMessage('Error al cargar los datos del gráfico.')
       }
     }
   }
@@ -73,15 +82,24 @@ export default function Graph() {
   }
 
   const renderChart = () => {
+    if (noDataMessage) {
+      return (
+        <div className='not-found'>
+          <div className="icon-not-found">
+            <NotFound />
+          </div>
+          <span>{noDataMessage}</span>
+        </div>
+      )
+    }
+
     if (!chartDataState || !chartDataState.dateRange) {
       return (
         <div className='not-found'>
           <div className="icon-not-found">
             <NotFound />
           </div>
-          <span>
-            No hay datos disponibles para mostrar.
-          </span>
+          <span>No hay datos disponibles para mostrar.</span>
         </div>
       )
     }
@@ -148,7 +166,7 @@ export default function Graph() {
             <div className="content-header">
               <div className="graph__header__title">{nameGraph}</div>
               <div className="graph__header__data">
-                <span>{dateGraph}</span>
+                <span>Periodo: {dateGraph}</span>
               </div>
             </div>
           </div>
@@ -158,7 +176,7 @@ export default function Graph() {
 
           <div className="button__graph">
             <button className='btn' onClick={backRouter}>
-              <ArrowLeft></ArrowLeft>
+              <ArrowLeft />
               <span>Atrás</span>
             </button>
           </div>

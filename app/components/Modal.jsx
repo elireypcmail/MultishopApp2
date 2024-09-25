@@ -17,6 +17,7 @@ const Modal = () => {
   const [isDataFetched, setIsDataFetched] = useState(false)
   const [chartData, setChartData] = useState([])
   const [instanciaUser, setInstanciaUser] = useState('')
+  const [noDataMessage, setNoDataMessage] = useState('')
   
   useEffect(() => {
     const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
@@ -116,7 +117,7 @@ const Modal = () => {
     
     setCurrentSelectedGraph(graph.value)
     
-    const defaultGraphType = defaultChartTypes[graph.name] || 'Barra'
+    const defaultGraphType = defaultChartTypes[graph.name] || 'Torta'
     setSelectedGraphType(defaultGraphType)
     localStorage.setItem('selectedGraphType', defaultGraphType)
   }  
@@ -129,6 +130,9 @@ const Modal = () => {
   
     const dateRange = JSON.parse(localStorage.getItem('dateRange'))
     const { from, to } = dateRange
+
+    const fromDate = new Date(dateRange.from).toLocaleDateString('en-CA')
+    const toDate   = new Date(dateRange.to).toLocaleDateString('en-CA')
   
     try {
       const response = await instance.post('/filter-data', {
@@ -139,19 +143,29 @@ const Modal = () => {
         kpi: localStorage.getItem('selectedGraph'),
       })
 
-      const chartDataWithDateRange = {
-        ...response.data,
-        dateRange: { from, to }
-      }
+      if (response.data && response.data.results && response.data.results.length > 0) {
+        const chartDataWithDateRange = {
+          ...response.data,
+          dateRange: { from, to }
+        }
 
-      localStorage.setItem('chartData', JSON.stringify(chartDataWithDateRange))
-      setChartData(chartDataWithDateRange)
-      setIsDataFetched(true)
-      console.log(chartDataWithDateRange)
+        localStorage.setItem('chartData', JSON.stringify(chartDataWithDateRange))
+        setChartData(chartDataWithDateRange)
+        setNoDataMessage('')
+      } else {
+        setNoDataMessage(`No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
+        localStorage.setItem('noDataMessage', `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
+        setChartData([])
+      }
       
+      setIsDataFetched(true)
       router.push('/graph')
     } catch (error) {
       console.error('Error fetching chart data:', error)
+      setNoDataMessage(`No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
+      localStorage.setItem('noDataMessage', `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
+      setIsDataFetched(true)
+      router.push('/graph')
     }
   }
 
@@ -206,8 +220,13 @@ const Modal = () => {
               ))}
             </ul>
             <div className="save-button-container">
-              <button onClick={handleClose}>Atrás</button>
-              <button onClick={handleSearchGraph} disabled={!currentSelectedGraph}>Graficar</button>
+              <button className='back' onClick={handleClose}>
+                <div className="btn">
+                  <ArrowLeft />
+                  <span>Atrás</span>
+                </div>
+              </button>
+              <button onClick={handleSearchGraph} disabled={!currentSelectedGraph}>Ver gráfico</button>
             </div>
           </div>
         </div>

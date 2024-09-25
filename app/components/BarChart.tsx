@@ -15,7 +15,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@comp/chart"
-import { AlertModal } from "./AlertModal"
 
 const chartConfig = {
   desktop: {
@@ -50,7 +49,6 @@ export default function BarChartComponent({ data, dateRange }: BarChartComponent
   const [formattedData, setFormattedData] = useState<{ period: string; total: number; promedio: number }[]>([])
   const [name, setName] = useState('')
   const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 300 })
-  const [missingDataMessage, setMissingDataMessage] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -72,22 +70,9 @@ export default function BarChartComponent({ data, dateRange }: BarChartComponent
       console.log('BarChartComponent: Formatted Data:', formatted)
       
       setFormattedData(formatted)
-
-      // Check for missing data
-      const allDates = getAllDatesInRange(new Date(dateRange.from), new Date(dateRange.to));
-      const missingDates = allDates.filter(date => 
-        !formatted.some(item => item.period === date.toISOString().split('T')[0])
-      ).map(date => date.toISOString().split('T')[0]);
-
-      if (missingDates.length > 0) {
-        setMissingDataMessage(`No hay datos disponibles para las siguientes fechas: ${missingDates.join(', ')}`);
-      } else {
-        setMissingDataMessage(null);
-      }
     } else {
       console.warn('BarChartComponent: Invalid or empty data received')
       setFormattedData([])
-      setMissingDataMessage('No hay datos disponibles para el rango de fechas seleccionado.');
     }
   }, [data, dateRange])
 
@@ -112,66 +97,51 @@ export default function BarChartComponent({ data, dateRange }: BarChartComponent
   }
 
   return (
-    <>
-      <AlertModal message={missingDataMessage} />
-      <Card ref={cardRef}>
-        <CardContent>
-          <ChartContainer config={chartConfig}>
-            <BarChart
-              width={chartDimensions.width}
-              height={chartDimensions.height}
-              data={formattedData}
-              margin={{
-                left: 0,
-                right: 0,
-                top: 20,
-                bottom: 60,
-              }}
-            >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="period"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={30}
-                angle={-45}
-                textAnchor="end"
-                interval={0}
-                tick={{ fontSize: 10 }}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar
-                dataKey="total"
-                fill="var(--color-desktop)"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-        <CardFooter className="flex-col items-start gap-2 text-sm">
-          <div className="flex gap-2 font-medium leading-none">
-            Promedio diario de {name} <TrendingUp className="h-4 w-4" />
-          </div>
-          <div className="mt-2 font-semibold">
-            Promedio Total: {formatNumber(parseFloat(data.promedioTotal))}
-          </div>
-        </CardFooter>
-      </Card>
-    </>
+    <Card ref={cardRef}>
+      <CardContent>
+        <ChartContainer config={chartConfig}>
+          <BarChart
+            width={chartDimensions.width}
+            height={chartDimensions.height}
+            data={formattedData}
+            margin={{
+              left: 0,
+              right: 0,
+              top: 20,
+              bottom: 60,
+            }}
+          >
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="period"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={30}
+              angle={-45}
+              textAnchor="end"
+              interval={0}
+              tick={{ fontSize: 10 }}
+            />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Bar
+              dataKey="total"
+              fill="var(--color-desktop)"
+              radius={[8, 8, 8, 8]}
+            />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
+        <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+        </div>
+        <div className="flex items-center gap-2 leading-none text-muted-foreground">
+          {new Date(dateRange.from).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - {new Date(dateRange.to).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+        </div>
+      </CardFooter>
+    </Card>
   )
-}
-
-function getAllDatesInRange(startDate: Date, endDate: Date) {
-  const dates = [];
-  let currentDate = new Date(startDate);
-
-  while (currentDate <= endDate) {
-    dates.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
-  }
-
-  return dates;
 }
