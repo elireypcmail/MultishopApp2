@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from "react"
-import { TrendingUp } from "lucide-react"
+import { TrendingUp, DollarSign } from "lucide-react"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 
 import {
@@ -41,6 +41,7 @@ interface LineChartComponentProps {
   data: {
     results: DataItem[];
     promedioTotal: string;
+    totalGeneral: string;
   };
   dateRange: { from: string; to: string };
 }
@@ -143,7 +144,10 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-        <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+          <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+        </div>
+        <div className="flex items-center gap-2 font-medium leading-none">
+          <DollarSign className="h-4 w-4" /> Total general: {formatNumber(parseFloat(data.totalGeneral))}
         </div>
         <div className="flex items-center gap-2 leading-none text-muted-foreground">
           {new Date(dateRange.from).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - {new Date(dateRange.to).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}

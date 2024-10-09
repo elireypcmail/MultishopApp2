@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Label, Pie, PieChart, Sector } from "recharts"
-import { PieSectorDataItem } from "recharts/types/polar/Pie"
-import { TrendingUp } from "lucide-react"
+import { Label, Pie, PieChart } from "recharts"
+import { TrendingUp, DollarSign } from "lucide-react"
 
 import {
   Card,
@@ -48,6 +47,7 @@ interface PieChartComponentProps {
   data: {
     results: DataItem[];
     promedioTotal: string;
+    totalGeneral: string;
   };
   dateRange: { from: string; to: string };
 }
@@ -116,10 +116,14 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
     return <div>No hay datos disponibles para mostrar.</div>
   }
 
+  const activeData = formattedData[activeIndex];
+  const totalValue = formattedData.reduce((sum, item) => sum + item.value, 0);
+  const percentage = activeData ? (activeData.value / totalValue) * 100 : 0;
+
   return (
-    <Card className="w-full max-w-4xl mx-auto" ref={cardRef}>
+    <Card className="w-full z-50" ref={cardRef}>
       <CardContent>
-        <ChartContainer config={chartConfig} className="mx-auto w-full">
+        <ChartContainer config={chartConfig} className="mx-auto w-full z-50">
           <PieChart width={chartDimensions.width} height={chartDimensions.height}>
             <ChartTooltip
               cursor={false}
@@ -134,104 +138,45 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
               innerRadius={chartDimensions.width * 0.15}
               outerRadius={chartDimensions.width * 0.3}
               strokeWidth={5}
-              activeIndex={activeIndex}
-              activeShape={({
-                cx,
-                cy,
-                midAngle,
-                innerRadius,
-                outerRadius,
-                startAngle,
-                endAngle,
-                fill,
-                payload,
-                percent,
-                value,
-              }: PieSectorDataItem) => {
-                const RADIAN = Math.PI / 180;
-                const sin = Math.sin(-RADIAN * (midAngle ?? 0));
-                const cos = Math.cos(-RADIAN * (midAngle ?? 0));
-                const sx = (cx ?? 0) + ((outerRadius ?? 0) + 10) * cos;
-                const sy = (cy ?? 0) + ((outerRadius ?? 0) + 10) * sin;
-                const mx = (cx ?? 0) + ((outerRadius ?? 0) + 30) * cos;
-                const my = (cy ?? 0) + ((outerRadius ?? 0) + 30) * sin;
-                const ex = mx + (cos >= 0 ? 1 : -1) * 22;
-                const ey = my;
-                const textAnchor = cos >= 0 ? 'start' : 'end';
-
-                return (
-                  <g>
-                    <Sector
-                      cx={cx}
-                      cy={cy}
-                      innerRadius={innerRadius}
-                      outerRadius={outerRadius}
-                      startAngle={startAngle}
-                      endAngle={endAngle}
-                      fill={fill}
-                    />
-                    <Sector
-                      cx={cx}
-                      cy={cy}
-                      startAngle={startAngle}
-                      endAngle={endAngle}
-                      innerRadius={(outerRadius ?? 0) + 6}
-                      outerRadius={(outerRadius ?? 0) + 10}
-                      fill={fill}
-                    />
-                    <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke={fill} fill="none" />
-                    <circle cx={ex} cy={ey} r={2} fill={fill} stroke="none" />
-                    <text 
-                      x={ex + (cos >= 0 ? 1 : -1) * 12} 
-                      y={ey} 
-                      textAnchor={textAnchor} 
-                      fill="#333"
-                      className="text-xs"
-                    >
-                      {`${formatNumber(value ?? 0)}`}
-                    </text>
-                    <text 
-                      x={ex + (cos >= 0 ? 1 : -1) * 12} 
-                      y={ey} 
-                      dy={18} 
-                      textAnchor={textAnchor} 
-                      fill="#999"
-                      className="text-xs"
-                    >
-                      {`(${((percent ?? 0) * 100).toFixed(2)}%)`}
-                    </text>
-                  </g>
-                );
-              }}
               onClick={handlePieClick}
             >
               <Label
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    const cy = viewBox.cy ?? 0; 
                     return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
+                      <g>
+                        <text
+                          x={viewBox.cx ?? 0}
+                          y={cy - 21}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          className="fill-muted-foreground text-[13px]"
+                        >
+                          {percentage.toFixed(2)}%
+                        </text>
+                        <text
+                          x={viewBox.cx ?? 0}
+                          y={cy + 2}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
                           className="fill-foreground text-xl font-bold"
                         >
-                          {formatNumber(formattedData[activeIndex]?.value ?? 0)}
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 20}
-                          className="fill-muted-foreground text-xs"
+                          {formatNumber(activeData?.value ?? 0)}
+                        </text>
+                        <text
+                          x={viewBox.cx ?? 0}
+                          y={cy + 25}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          className="fill-muted-foreground text-[13px]"
                         >
                           Total
-                        </tspan>
-                      </text>
+                        </text>
+                      </g>
                     )
                   }
+                  return null;
                 }}
               />
             </Pie>
@@ -240,7 +185,10 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-        <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+          <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+        </div>
+        <div className="flex items-center gap-2 font-medium leading-none">
+          <DollarSign className="h-4 w-4" /> Total general: {formatNumber(parseFloat(data.totalGeneral))}
         </div>
         <div className="flex items-center gap-2 leading-none text-muted-foreground">
           {new Date(dateRange.from).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - {new Date(dateRange.to).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}

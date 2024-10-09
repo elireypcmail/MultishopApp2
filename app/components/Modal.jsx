@@ -18,10 +18,16 @@ const Modal = () => {
   const [chartData, setChartData] = useState([])
   const [instanciaUser, setInstanciaUser] = useState('')
   const [noDataMessage, setNoDataMessage] = useState('')
+  const [defaultGraphType, setDefaultGraphType] = useState('Torta')
   
   useEffect(() => {
     const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
     setCategory(savedCategory || '')
+
+    const savedGraphType = localStorage.getItem('defaultGraphType')
+    if (savedGraphType) {
+      setDefaultGraphType(savedGraphType)
+    }
   }, [router.query.category])
 
   useEffect(() => {
@@ -117,10 +123,10 @@ const Modal = () => {
     
     setCurrentSelectedGraph(graph.value)
     
-    const defaultGraphType = defaultChartTypes[graph.name] || 'Torta'
-    setSelectedGraphType(defaultGraphType)
-    localStorage.setItem('selectedGraphType', defaultGraphType)
-  }  
+    const graphType = defaultChartTypes[graph.name] || defaultGraphType
+    setSelectedGraphType(graphType)
+    localStorage.setItem('selectedGraphType', graphType)
+  } 
 
   const handleFetchChartData = async () => {
     if (!instanciaUser) {

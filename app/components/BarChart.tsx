@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from "react"
-import { TrendingUp } from "lucide-react"
+import { TrendingUp, DollarSign } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import {
@@ -41,6 +41,7 @@ interface BarChartComponentProps {
   data: {
     results: DataItem[];
     promedioTotal: string;
+    totalGeneral: string;
   };
   dateRange: { from: string; to: string };
 }
@@ -59,13 +60,13 @@ export default function BarChartComponent({ data, dateRange }: BarChartComponent
   
     if (data && data.results && Array.isArray(data.results) && data.results.length > 0) {
       console.log('BarChartComponent: Processing data...')
-      const sortedData = data.results.sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime());
+      const sortedData = data.results.sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime())
       
       const formatted = sortedData.map(item => ({
         period: item.periodo,
         total: parseFloat(item.total_valor),
         promedio: parseFloat(item.promedio_valor),
-      }));
+      }))
 
       console.log('BarChartComponent: Formatted Data:', formatted)
       
@@ -136,7 +137,10 @@ export default function BarChartComponent({ data, dateRange }: BarChartComponent
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-        <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+          <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+        </div>
+        <div className="flex items-center gap-2 font-medium leading-none">
+          <DollarSign className="h-4 w-4" /> Total general: {formatNumber(parseFloat(data.totalGeneral))}
         </div>
         <div className="flex items-center gap-2 leading-none text-muted-foreground">
           {new Date(dateRange.from).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - {new Date(dateRange.to).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}

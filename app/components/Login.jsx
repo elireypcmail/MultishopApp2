@@ -68,8 +68,9 @@ export default function Login() {
         const tokenRes = await verifyToken(res.tokenCode)
         if (tokenRes.message == 'Suscripción activa') {
           setCookie('instancia', res.identificacion)
+          localStorage.setItem('defaultGraphType', res.type_graph)
           notifySucces('Haz iniciado sesión!')
-
+  
           setTimeout(() => {
             push('/date')
           }, 3000)
@@ -79,9 +80,10 @@ export default function Login() {
           console.error('Error al verificar el token:', tokenRes.message)
         }
       }
-      notifyError(res.message)
     } catch (error) {
-      notifyError(error?.response?.data?.message)
+      if (error) {
+        notifyError(error?.response?.data?.message)
+      } 
       console.error('Error en la solicitud:', error)
     }
   }

@@ -34,13 +34,13 @@
     }
 
     .footer2 {
+      display: flex;
+      flex-direction: row;
       position: absolute;
-      bottom: 10px; 
-      width: 100%;
-      align-items: center;
-      padding: 0 20px;
-      position: absolute; 
-      bottom: 10vh; 
+      width: 90%;
+      height: 40px;
+      top: 83%;
+      margin-left: 12px;
 
       .logo-small {
         width: 33%;
@@ -48,13 +48,16 @@
 
       .button-calendar {
         display: flex;
-        align-items: center;
         justify-content: center;
-        width: 40%;
-        background: #4487B2;
-        border-radius: 10px;
-        height: 4.5vh;
+        align-items: center;
+        background-color: #4487B2;
+        width: 35%;
         color: white;
+        font-family: title;
+        font-size: 17px;
+        border: none;
+        cursor: pointer;
+        border-radius: 10px;
 
         span {
           padding-right: 6px;
