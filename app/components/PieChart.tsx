@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { Label, Pie, PieChart } from "recharts"
-import { TrendingUp, DollarSign } from "lucide-react"
+import { Label, Pie, PieChart }                 from "recharts"
+import { TrendingUp, DollarSign }               from "lucide-react"
+import { useState, useEffect, useMemo, useRef } from "react"
 
 import {
   Card,
@@ -19,7 +19,7 @@ import {
 const generateBlueShades = (count: number) => {
   return Array.from({ length: count }, (_, i) => 
     `hsl(210, 100%, ${Math.max(10, 50 - i * (40 / (count - 1)))}%)`
-  );
+  )
 }
 
 const chartConfig = {
@@ -44,55 +44,28 @@ interface DataItem {
 }
 
 interface PieChartComponentProps {
-  data: {
-    results: DataItem[];
-    promedioTotal: string;
-    totalGeneral: string;
-  };
+  data: DataItem[];
   dateRange: { from: string; to: string };
 }
 
 export default function PieChartComponent({ data, dateRange }: PieChartComponentProps) {
-  const [formattedData, setFormattedData] = React.useState<{ period: string; value: number; fill: string }[]>([])
-  const [name, setName] = React.useState('')
-  const [activePeriod, setActivePeriod] = React.useState('')
-  const [chartDimensions, setChartDimensions] = React.useState({ width: 0, height: 0 })
-  const cardRef = React.useRef<HTMLDivElement>(null)
+  const [name, setName]                       = useState('')
+  const [activePeriod, setActivePeriod]       = useState('')
+  const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 0 })
+  const cardRef = useRef<HTMLDivElement>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('PieChartComponent: Received data:', data)
     
     const graphName = localStorage.getItem("selectedGraphName")
     setName(graphName || "")
-  
-    if (data && data.results && Array.isArray(data.results) && data.results.length > 0) {
-      console.log('PieChartComponent: Processing data...')
-      const sortedData = data.results.sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime());
-      const blueShades = generateBlueShades(sortedData.length)
-      
-      const formatted = sortedData.map((item, index) => ({
-        period: item.periodo,
-        value: parseFloat(item.total_valor),
-        fill: blueShades[index],
-      }));
+  }, [data])
 
-      console.log('PieChartComponent: Formatted Data:', formatted)
-      
-      const filteredData = formatted.filter(item => item.value > 0);
-      
-      setFormattedData(filteredData)
-      setActivePeriod(filteredData[0]?.period || '')
-    } else {
-      console.warn('PieChartComponent: Invalid or empty data received')
-      setFormattedData([])
-    }
-  }, [data, dateRange])
-
-  React.useEffect(() => {
+  useEffect(() => {
     const updateChartDimensions = () => {
       if (cardRef.current) {
         const { width } = cardRef.current.getBoundingClientRect()
-        const height = Math.min(width, 400) 
+        const height    = Math.min(width, 400) 
         setChartDimensions({ width, height })
       }
     }
@@ -103,7 +76,31 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
     return () => window.removeEventListener('resize', updateChartDimensions)
   }, [])
 
-  const activeIndex = React.useMemo(
+  const formattedData = useMemo(() => {
+    if (Array.isArray(data) && data.length > 0) {
+      console.log('PieChartComponent: Processing data...')
+      const sortedData = [...data].sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime())
+      const blueShades = generateBlueShades(sortedData.length)
+      
+      const formatted = sortedData.map((item, index) => ({
+        period: item.periodo,
+        value:  parseFloat(item.total_valor),
+        fill:   blueShades[index],
+      }))
+
+      console.log('PieChartComponent: Formatted Data:', formatted)
+      
+      return formatted.filter(item => item.value > 0)
+    }
+    console.warn('PieChartComponent: Invalid or empty data received')
+    return []
+  }, [data])
+
+  useEffect(() => {
+    setActivePeriod(formattedData[0]?.period || '')
+  }, [formattedData])
+
+  const activeIndex = useMemo(
     () => formattedData.findIndex((item) => item.period === activePeriod),
     [formattedData, activePeriod]
   )
@@ -112,13 +109,13 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
     setActivePeriod(data.period)
   }
 
-  if (!data || !data.results || data.results.length === 0) {
-    return <div>No hay datos disponibles para mostrar.</div>
-  }
+  const totalValue    = useMemo(() => formattedData.reduce((sum, item) => sum + item.value, 0), [formattedData])
+  const promedioTotal = useMemo(() => formattedData.length > 0 ? totalValue / formattedData.length : 0, [formattedData, totalValue])
 
-  const activeData = formattedData[activeIndex];
-  const totalValue = formattedData.reduce((sum, item) => sum + item.value, 0);
-  const percentage = activeData ? (activeData.value / totalValue) * 100 : 0;
+  if (!data || data.length === 0) return <div>No hay datos disponibles para mostrar.</div>
+
+  const activeData = formattedData[activeIndex]
+  const percentage = activeData ? (activeData.value / totalValue) * 100 : 0
 
   return (
     <Card className="w-full z-50" ref={cardRef}>
@@ -185,10 +182,10 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(parseFloat(data.promedioTotal))} 
+          <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(promedioTotal)} 
         </div>
         <div className="flex items-center gap-2 font-medium leading-none">
-          <DollarSign className="h-4 w-4" /> Total general: {formatNumber(parseFloat(data.totalGeneral))}
+          <DollarSign className="h-4 w-4" /> Total general: {formatNumber(totalValue)}
         </div>
         <div className="flex items-center gap-2 leading-none text-muted-foreground">
           {new Date(dateRange.from).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - {new Date(dateRange.to).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}

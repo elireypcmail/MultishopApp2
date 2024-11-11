@@ -1,7 +1,7 @@
-import { User, Sun, Moon } from "./Icons"
-import Image from "next/image"
+import { User, Sun, Moon }     from "./Icons"
+import Image                   from "next/image"
 import { useEffect, useState } from "react"
-import multishop from '@p/Logo Sistema Multishop Pequeno.png'
+import multishop               from '@p/Logo Sistema Multishop Pequeno.png'
 
 export default function Navbar() {
   const [darkMode, setDarkMode] = useState(false)
@@ -14,9 +14,7 @@ export default function Navbar() {
     }
   }, [darkMode])
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
-  }
+  const toggleDarkMode = () => { setDarkMode(!darkMode) }
 
   return (
     <nav className="navbar">

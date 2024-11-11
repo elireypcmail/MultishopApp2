@@ -1,17 +1,17 @@
 import "react-day-picker/dist/style.css"
 import React, { useState, useEffect } from "react"
-import { ArrowRight, Sun, Moon } from "./Icons"
-import { addDays } from "date-fns"
-import { DayPicker } from "react-day-picker"
-import { es } from 'date-fns/locale'
-import multishop from "@p/Logo Sistema Multishop Pequeno.png"
-import Image from "next/image"
-import FooterGraph from "./Footer"
-import Router from "next/router"
+import { ArrowRight, Sun, Moon }      from "./Icons"
+import { addDays }                    from "date-fns"
+import { DayPicker }                  from "react-day-picker"
+import { es }                         from 'date-fns/locale'
+import multishop                      from "@p/Logo Sistema Multishop Pequeno.png"
+import Image                          from "next/image"
+import FooterGraph                    from "./Footer"
+import Router                         from "next/router"
 
 export default function DateComponent() {
   const [darkMode, setDarkMode] = useState(false)
-  const [range, setRange] = useState({
+  const [range, setRange]       = useState({
     from: new Date(),
     to: addDays(new Date(), 4),
   })
@@ -20,9 +20,7 @@ export default function DateComponent() {
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode")
-    if (savedDarkMode !== null) {
-      setDarkMode(JSON.parse(savedDarkMode))
-    }
+    if (savedDarkMode !== null) setDarkMode(JSON.parse(savedDarkMode)) 
 
     const savedRange = localStorage.getItem("dateRange")
     if (savedRange) {

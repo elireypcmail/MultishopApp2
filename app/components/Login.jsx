@@ -1,9 +1,14 @@
-import { useState } from 'react'
-import Image from 'next/image'
-import multishop from '@p/Logo Sistema Multishop Pequeno.png'
-import { useRouter } from 'next/router'
-import VerifyCode from './VerifyCode'
-import { loginUser, verifyToken } from '@api/Post'
+import { useState }       from 'react'
+import Image              from 'next/image'
+import multishop          from '@p/Logo Sistema Multishop Pequeno.png'
+import { useRouter }      from 'next/router'
+import VerifyCode         from './VerifyCode'
+import { setCookie }      from '@g/cookies'
+import toast, { Toaster } from 'react-hot-toast'
+import { 
+  loginUser, 
+  verifyToken 
+} from '@api/Post'
 import {
   UserLogin,
   Identificacion,
@@ -14,18 +19,16 @@ import {
   HidePassword, 
   VisiblePassword,  
 } from '@c/Icons'
-import { setCookie } from '@g/cookies'
-import toast, { Toaster } from 'react-hot-toast'
 
 export default function Login() {
   const [cliente, setCliente] = useState({
     login_user: '',
     clave: '',
   })
-  const [idtError, setIdtError] = useState('')
-  const [telError, setTelError] = useState('')
-  const [tokenValue, setTokenValue] = useState(null)
-  const [verifyOpen, setVerifyOpen] = useState(false)
+  const [idtError, setIdtError]         = useState('')
+  const [telError, setTelError]         = useState('')
+  const [tokenValue, setTokenValue]     = useState(null)
+  const [verifyOpen, setVerifyOpen]     = useState(false)
   const [showPassword, setShowPassword] = useState(false) 
 
   const notifySucces  = (msg) => { toast.success(msg) }
@@ -81,9 +84,7 @@ export default function Login() {
         }
       }
     } catch (error) {
-      if (error) {
-        notifyError(error?.response?.data?.message)
-      } 
+      if (error) notifyError(error?.response?.data?.message) 
       console.error('Error en la solicitud:', error)
     }
   }
@@ -107,9 +108,7 @@ export default function Login() {
     }
   }
 
-  const handlePasswordToggle = () => {
-    setShowPassword((prevShowPassword) => !prevShowPassword)
-  }  
+  const handlePasswordToggle = () => { setShowPassword((prevShowPassword) => !prevShowPassword) }  
 
   return (
     <div className="body">

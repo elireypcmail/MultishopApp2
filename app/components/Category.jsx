@@ -1,6 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image                   from 'next/image'
+import { useRouter }           from 'next/router'
+import { ArrowLeft }           from './Icons'
+import multishop               from '@p/Logo Sistema Multishop Pequeno.png'
+import FooterGraph             from './Footer'
 import { 
   Financial, 
   Operative, 
@@ -8,15 +13,10 @@ import {
   Sun, 
   Moon 
 } from './Icons'
-import Image from 'next/image'
-import { useRouter } from 'next/router'
-import { ArrowLeft } from './Icons'
-import multishop from '@p/Logo Sistema Multishop Pequeno.png'
-import FooterGraph from './Footer'
 
 export default function Category() {
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode]                 = useState(false)
   const router = useRouter()
 
   useEffect(() => {

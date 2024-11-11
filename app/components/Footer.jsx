@@ -1,4 +1,6 @@
-import Link from "next/link"
+import Link             from "next/link"
+import { removeCookie } from "@g/cookies"
+import { useRouter }    from "next/router"
 import { 
   CalendarRange,
   CategoryGraph,
@@ -6,8 +8,6 @@ import {
   Graph,
   Logout
 } from "./Icons"
-import { removeCookie } from "@g/cookies"
-import { useRouter } from "next/router"
 
 export default function FooterGraph() {
   const { push } = useRouter()

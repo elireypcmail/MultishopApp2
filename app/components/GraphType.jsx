@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { CloseModal, BarGraph, CircularGraph, LineGraph } from './Icons'
-import { defaultChartTypes } from '@conf/defaultChartTypes'
+import { defaultChartTypes }          from '@conf/defaultChartTypes'
+import { 
+  CloseModal, 
+  BarGraph, 
+  CircularGraph, 
+  LineGraph 
+} from './Icons'
 
 const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
   const [currentSelectedGraphType, setCurrentSelectedGraphType] = useState('')
@@ -22,9 +27,7 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
     }
   }, [selectedGraphName])
 
-  const handleItemClick = (graphType) => {
-    setCurrentSelectedGraphType(graphType.name)
-  }
+  const handleItemClick = (graphType) => { setCurrentSelectedGraphType(graphType.name) }
 
   const handleClose = () => {
     setClosing(true)

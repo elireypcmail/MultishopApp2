@@ -4,9 +4,15 @@ import FooterGraph from './Footer'
 import BarChartComponent from './BarChart'
 import PieChartComponent from './PieChart'
 import LineChartComponent from './AreaChart'
-import { Sun, Moon, NotFound, ArrowLeft, Options } from './Icons'
 import { defaultChartTypes } from '@conf/defaultChartTypes'
 import GraphTypeModal from './GraphType'
+import { 
+  Sun, 
+  Moon, 
+  NotFound, 
+  ArrowLeft, 
+  Options 
+} from './Icons'
 
 export default function Graph() {
   const router = useRouter()
@@ -17,10 +23,13 @@ export default function Graph() {
   const [currentGraphType, setCurrentGraphType] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false) 
   const [noDataMessage, setNoDataMessage] = useState('')
+  const [category, setCategory] = useState('')
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true'
     setDarkMode(savedDarkMode)
+    const savedCategory = localStorage.getItem('selectedCategory')
+    setCategory(savedCategory || '')
   }, [])
 
   useEffect(() => {
@@ -93,24 +102,23 @@ export default function Graph() {
       )
     }
 
-    if (!chartDataState || !chartDataState.dateRange) {
-      return (
-        <div className='not-found'>
-          <div className="icon-not-found">
-            <NotFound />
-          </div>
-          <span>No hay datos disponibles para mostrar.</span>
-        </div>
-      )
+    if (!chartDataState) {
+      return <div>Cargando datos...</div>
     }
+
+    if (category === 'Estadísticos') return renderStatisticalData()
+
+    const chartData = chartDataState.results || chartDataState
+    console.log(chartData);
+    
 
     switch (currentGraphType) {
       case 'Barra':
-        return <BarChartComponent data={chartDataState} dateRange={chartDataState.dateRange} />
+        return <BarChartComponent data={chartData} dateRange={chartDataState.dateRange} />
       case 'Torta':
-        return <PieChartComponent data={chartDataState} dateRange={chartDataState.dateRange} />
+        return <PieChartComponent data={chartData} dateRange={chartDataState.dateRange} />
       case 'Línea':
-        return <LineChartComponent data={chartDataState} dateRange={chartDataState.dateRange} />
+        return <LineChartComponent data={chartData} dateRange={chartDataState.dateRange} />
       default:
         return (
           <div className='not-found'>
@@ -118,11 +126,76 @@ export default function Graph() {
               <NotFound />
             </div>
             <span>
-              No se ha seleccionado ningún tipo de gráfico.
+              No se ha seleccionado ningún tipo de gráfico válido.
             </span>
           </div>
         )
     }
+  }
+
+  const renderStatisticalData = () => {
+    console.log('Statistical Data:', chartDataState)
+    
+    if (!chartDataState || Object.keys(chartDataState).length === 0) {
+      return <div>No hay datos estadísticos disponibles.</div>
+    }
+  
+    const dataEntries = Object.entries(chartDataState).filter(([key]) => key !== 'dateRange')
+  
+    const getFieldName = (key) => {
+      const fieldNames = {
+        nom_op_bs: 'Nombre',
+        cod_op_bs: 'Código',
+        nom_clibs: 'Cliente',
+        cod_clibs: 'Código Cliente',
+        nom_fab_bs: 'Fabricante',
+        cod_fab_bs: 'Código Fabricante',
+        nom_art_bs: 'Producto',
+        cod_art_bs: 'Código Producto',
+        numero_operaciones: 'N° de Operaciones',
+        unidades_vendidas: 'Unidades Vendidas',
+        fecha: 'Fecha',
+        total_ventas: 'Total Ventas'
+      }
+      return fieldNames[key] || key
+    }
+
+    return (
+      <div className="statistical-data w-full max-w-md p-6">
+        <div className="flow-root">
+          <ul role="list" className="divide-y">
+            {dataEntries.map(([key, value]) => (
+              <li key={key} className="statistical-item py-10 sm:py-10">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0 ms-4">
+                    {Object.entries(value).map(([fieldKey, fieldValue]) => {
+                      if (fieldKey === 'id' || fieldKey === 'total_ventas') return null;
+                      if (fieldKey === 'fecha') {
+                        return (
+                          <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
+                            {getFieldName(fieldKey)}: {new Date(fieldValue).toLocaleDateString()}
+                          </p>
+                        )
+                      } else if (typeof fieldValue === 'string' || typeof fieldValue === 'number') {
+                        return (
+                          <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
+                            {getFieldName(fieldKey)}: {fieldValue}
+                          </p>
+                        )
+                      }
+                      return null
+                    })}
+                  </div>
+                  <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                    ${parseFloat(value.total_ventas).toFixed(2)}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )
   }
 
   const backRouter = (e) => {
@@ -130,13 +203,9 @@ export default function Graph() {
     router.push('/listkpi')
   }
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true)
-  }
+  const handleOpenModal = () => { setIsModalOpen(true) }
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
-  }
+  const handleCloseModal = () => { setIsModalOpen(false) }
 
   const handleSaveGraphType = (newGraphType) => {
     setCurrentGraphType(newGraphType)
@@ -185,7 +254,7 @@ export default function Graph() {
         <FooterGraph />
       </div>
 
-      {isModalOpen && (
+      {isModalOpen && category !== 'Estadísticos' && (
         <GraphTypeModal
           onClose={handleCloseModal}
           onSave={handleSaveGraphType}
