@@ -46,9 +46,10 @@ interface DataItem {
 interface PieChartComponentProps {
   data: DataItem[];
   dateRange: { from: string; to: string };
+  dateTypeRange: string;
 }
 
-export default function PieChartComponent({ data, dateRange }: PieChartComponentProps) {
+export default function PieChartComponent({ data, dateRange, dateTypeRange }: PieChartComponentProps) {
   const [name, setName]                       = useState('')
   const [activePeriod, setActivePeriod]       = useState('')
   const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 0 })
@@ -182,10 +183,10 @@ export default function PieChartComponent({ data, dateRange }: PieChartComponent
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 font-medium leading-none">
-          <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(promedioTotal)} 
+          <TrendingUp className="h-4 w-4" /> Promedio {dateTypeRange}: {formatNumber(promedioTotal)} 
         </div>
         <div className="flex items-center gap-2 font-medium leading-none">
-          <DollarSign className="h-4 w-4" /> Total general: {formatNumber(totalValue)}
+          <DollarSign className="h-4 w-4" /> Total General: {formatNumber(totalValue)}
         </div>
         <div className="flex items-center gap-2 leading-none text-muted-foreground">
           {new Date(dateRange.from).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - {new Date(dateRange.to).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}

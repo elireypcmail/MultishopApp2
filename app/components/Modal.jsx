@@ -198,7 +198,7 @@ const Modal = () => {
 
         <div className='modal-ca'>
           <div className='modal-content'>
-            <h2 className='ti-graph'>{category === 'Estadísticos' ? 'Estadísticas' : 'Gráficos'} {category}</h2>
+            <h2 className='ti-graph'>{category === 'Estadísticos' ? 'Análisis' : 'Gráficos'} {category}</h2>
             <ul className='li'>
               {getGraphs().map((graph) => (
                 <li

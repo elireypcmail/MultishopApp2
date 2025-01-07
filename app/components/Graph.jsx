@@ -24,6 +24,7 @@ export default function Graph() {
   const [isModalOpen, setIsModalOpen] = useState(false) 
   const [noDataMessage, setNoDataMessage] = useState('')
   const [category, setCategory] = useState('')
+  const [typeRange, setTypeRange] = useState('')
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true'
@@ -79,16 +80,37 @@ export default function Graph() {
   }
 
   const loadName = () => {
-    const res = localStorage.getItem('selectedGraphName')
+    let res = localStorage.getItem('selectedGraphName')
     const date = JSON.parse(localStorage.getItem('dateRange'))
-    if (date) {
-      const from = new Date(date.from).toLocaleDateString('en-CA')
-      const to = new Date(date.to).toLocaleDateString('en-CA')
 
+    if (date) {
+      const from = new Date(date.from)
+      const to = new Date(date.to)
+      const fromFormatted = from.toLocaleDateString('en-CA')
+      const toFormatted = to.toLocaleDateString('en-CA')
+  
+      const diffInTime = to.getTime() - from.getTime()
+      const diffInDays = Math.ceil(diffInTime / (1000 * 60 * 60 * 24))
+  
+      let typeRange
+      if (diffInDays <= 15) {
+        typeRange = 'Diario'
+      } else if (diffInDays <= 45) {
+        typeRange = 'Semanal'
+      } else {
+        typeRange = 'Mensual'
+
+        if(res == "Día más Exitoso" || res == "Cajeros con más Venta" || res == "Fabricantes con más Ventas" ){
+          res = `${res} - TOP 10`
+        }
+      }
+  
       setNameGraph(res)
-      setDateGraph(`${from} / ${to}`)
+      setDateGraph(`${fromFormatted} / ${toFormatted}`)
+      setTypeRange(typeRange)
     }
   }
+  
 
   const renderChart = () => {
     if (noDataMessage) {
@@ -114,11 +136,11 @@ export default function Graph() {
 
     switch (currentGraphType) {
       case 'Barra':
-        return <BarChartComponent data={chartData} dateRange={chartDataState.dateRange} />
+        return <BarChartComponent data={chartData} dateRange={chartDataState.dateRange} dateTypeRange={typeRange} />
       case 'Torta':
-        return <PieChartComponent data={chartData} dateRange={chartDataState.dateRange} />
+        return <PieChartComponent data={chartData} dateRange={chartDataState.dateRange} dateTypeRange={typeRange} />
       case 'Línea':
-        return <LineChartComponent data={chartData} dateRange={chartDataState.dateRange} />
+        return <LineChartComponent data={chartData} dateRange={chartDataState.dateRange} dateTypeRange={typeRange} />
       default:
         return (
           <div className='not-found'>
@@ -134,13 +156,13 @@ export default function Graph() {
   }
 
   const renderStatisticalData = () => {
-    console.log('Statistical Data:', chartDataState)
-    
+    console.log('Statistical Data:', chartDataState);
+  
     if (!chartDataState || Object.keys(chartDataState).length === 0) {
-      return <div>No hay datos estadísticos disponibles.</div>
+      return <div>No hay datos estadísticos disponibles.</div>;
     }
   
-    const dataEntries = Object.entries(chartDataState).filter(([key]) => key !== 'dateRange')
+    const dataEntries = Object.entries(chartDataState).filter(([key]) => key !== 'dateRange');
   
     const getFieldName = (key) => {
       const fieldNames = {
@@ -155,48 +177,62 @@ export default function Graph() {
         numero_operaciones: 'N° de Operaciones',
         unidades_vendidas: 'Unidades Vendidas',
         fecha: 'Fecha',
-        total_ventas: 'Total Ventas'
-      }
-      return fieldNames[key] || key
-    }
-
+        total_ventas: 'Total Ventas',
+      };
+      return fieldNames[key] || key;
+    };
+  
+    const isTopDay = nameGraph.includes('Día más Exitoso');
+  
     return (
       <div className="statistical-data w-full max-w-md p-6">
         <div className="flow-root">
           <ul role="list" className="divide-y">
-            {dataEntries.map(([key, value]) => (
-              <li key={key} className="statistical-item py-10 sm:py-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0 ms-4">
-                    {Object.entries(value).map(([fieldKey, fieldValue]) => {
-                      if (fieldKey === 'id' || fieldKey === 'total_ventas') return null;
-                      if (fieldKey === 'fecha') {
-                        return (
-                          <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
-                            {getFieldName(fieldKey)}: {new Date(fieldValue).toLocaleDateString()}
-                          </p>
-                        )
-                      } else if (typeof fieldValue === 'string' || typeof fieldValue === 'number') {
-                        return (
-                          <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
-                            {getFieldName(fieldKey)}: {fieldValue}
-                          </p>
-                        )
-                      }
-                      return null
-                    })}
+            {dataEntries.map(([key, value]) => {
+              // Reordenar datos si es el día más exitoso
+              const reorderedFields = Object.entries(value).sort(([fieldKeyA], [fieldKeyB]) => {
+                if (isTopDay) {
+                  if (fieldKeyA === 'fecha') return -1; // Mostrar 'fecha' primero
+                  if (fieldKeyB === 'fecha') return 1;
+                }
+                return 0; // Mantener el orden original para otros casos
+              });
+  
+              return (
+                <li key={key} className="statistical-item py-10 sm:py-10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0 ms-4">
+                      {reorderedFields.map(([fieldKey, fieldValue]) => {
+                        if (fieldKey === 'id' || fieldKey === 'total_ventas') return null;
+                        if (fieldKey === 'fecha') {
+                          return (
+                            <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
+                              {getFieldName(fieldKey)}: {new Date(fieldValue).toLocaleDateString()}
+                            </p>
+                          );
+                        } else if (typeof fieldValue === 'string' || typeof fieldValue === 'number') {
+                          return (
+                            <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
+                              {getFieldName(fieldKey)}: {fieldValue}
+                            </p>
+                          );
+                        }
+                        return null;
+                      })}
+                    </div>
+                    <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                      ${parseFloat(value.total_ventas).toFixed(2)}
+                    </div>
                   </div>
-                  <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                    ${parseFloat(value.total_ventas).toFixed(2)}
-                  </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
-    )
-  }
+    );
+  };
+  
 
   const backRouter = (e) => {
     e.preventDefault()
@@ -236,6 +272,7 @@ export default function Graph() {
               <div className="graph__header__title">{nameGraph}</div>
               <div className="graph__header__data">
                 <span>Periodo: {dateGraph}</span>
+                <span>Tipo de presentación de datos: {typeRange}</span>
               </div>
             </div>
           </div>
