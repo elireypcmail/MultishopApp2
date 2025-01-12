@@ -79,16 +79,16 @@ const Modal = () => {
         return [
           { name: 'Ventas en USD',      value: 'totalventa' },
           { name: 'Utilidad',           value: 'totalut' },
-          { name: 'Ticket de Venta',    value: 'valor_tp' },
+          { name: 'Ticket de Venta',    value: 'ticketDeVenta' },
           { name: 'Costo de Venta',     value: 'totalcosto' },
-          { name: 'Margen de Utilidad', value: 'porcentajedeutilidad' },
+          { name: 'Margen de Utilidad', value: 'margenDeUtilidad' },
         ]
       case 'Operativos':
         return [
           { name: 'Unidades Vendidas',           value: 'cantidadund' },
           { name: 'Facturas Emitidas',           value: 'cantidadfac' },
-          { name: 'Unidades en Bolsa',           value: 'valor_uxb' },
-          { name: 'Valor Promedio de la Unidad', value: 'valor_up' },
+          { name: 'Unidades en Bolsa',           value: 'unidadesVendidas' },
+          { name: 'Valor Promedio de la Unidad', value: 'valorDeLaUnidadPromedio' },
           { name: 'Clientes Atendidos',          value: 'clientesa' },
           { name: 'Clientes Frecuentes',         value: 'clientesf' },
           { name: 'Clientes Nuevos',             value: 'clientesn' },
@@ -100,6 +100,7 @@ const Modal = () => {
           { name: 'Cajeros con más Venta',      value: 'CajerosConMasVentas' },
           { name: 'Fabricantes con más Ventas', value: 'FabricantesConMasVentas' },
           { name: 'Productos más vendidos',     value: 'ProductosTOP' },
+          { name: 'Valores de Inventario',     value: 'Inventario' },
         ]
       default:
         return []

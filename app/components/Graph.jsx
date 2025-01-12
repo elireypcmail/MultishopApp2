@@ -131,7 +131,7 @@ export default function Graph() {
     if (category === 'Estadísticos') return renderStatisticalData()
 
     const chartData = chartDataState.results || chartDataState
-    console.log(chartData);
+    console.log(chartData)
     
 
     switch (currentGraphType) {
@@ -156,13 +156,13 @@ export default function Graph() {
   }
 
   const renderStatisticalData = () => {
-    console.log('Statistical Data:', chartDataState);
+    console.log('Statistical Data:', chartDataState)
   
     if (!chartDataState || Object.keys(chartDataState).length === 0) {
-      return <div>No hay datos estadísticos disponibles.</div>;
+      return <div>No hay datos estadísticos disponibles.</div>
     }
   
-    const dataEntries = Object.entries(chartDataState).filter(([key]) => key !== 'dateRange');
+    const dataEntries = Object.entries(chartDataState).filter(([key]) => key !== 'dateRange')
   
     const getFieldName = (key) => {
       const fieldNames = {
@@ -178,60 +178,77 @@ export default function Graph() {
         unidades_vendidas: 'Unidades Vendidas',
         fecha: 'Fecha',
         total_ventas: 'Total Ventas',
-      };
-      return fieldNames[key] || key;
-    };
+        cantidad_und_inv: 'Cantidad de Unidades',
+        total_usdca_inv: 'Valor Inventario USD CA',
+        total_usdcp_inv: 'Valor Inventario USD CP', 
+        total_bsca_inv: 'Valor Inventario BS CA', 
+        total_bscp_inv: 'Valor Inventario BS CP' 
+      }
+      return fieldNames[key] || key
+    }
   
-    const isTopDay = nameGraph.includes('Día más Exitoso');
-  
+    const isTopDay = nameGraph.includes('Día más Exitoso') || nameGraph.includes('Valores de Inventario')
+
+    // Lista de KPIs para los cuales NO mostrar la fecha
+    const hideDateForKPI = ['Venta más Exitosa', 'Productos más vendidos', 'Fabricantes con más Ventas', 'Cajeros con más Venta']
+    
     return (
       <div className="statistical-data w-full max-w-md p-6">
         <div className="flow-root">
           <ul role="list" className="divide-y">
             {dataEntries.map(([key, value]) => {
-              // Reordenar datos si es el día más exitoso
+              // Reordenar datos si es uno de los casos de interés
               const reorderedFields = Object.entries(value).sort(([fieldKeyA], [fieldKeyB]) => {
                 if (isTopDay) {
-                  if (fieldKeyA === 'fecha') return -1; // Mostrar 'fecha' primero
-                  if (fieldKeyB === 'fecha') return 1;
+                  if (fieldKeyA === 'fecha') return -1 // Priorizar 'fecha'
+                  if (fieldKeyB === 'fecha') return 1
                 }
-                return 0; // Mantener el orden original para otros casos
-              });
-  
+                return 0 // Mantener el orden original para otros casos
+              })
+    
               return (
                 <li key={key} className="statistical-item py-10 sm:py-10">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0 ms-4">
                       {reorderedFields.map(([fieldKey, fieldValue]) => {
-                        if (fieldKey === 'id' || fieldKey === 'total_ventas') return null;
+                        if (fieldKey === 'id' || fieldKey === 'total_ventas') return null
+    
+                        // Ocultar la fecha si el KPI está en la lista `hideDateForKPI`
+                        if (fieldKey === 'fecha' && hideDateForKPI.includes(nameGraph)) return null
+    
                         if (fieldKey === 'fecha') {
                           return (
                             <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
                               {getFieldName(fieldKey)}: {new Date(fieldValue).toLocaleDateString()}
                             </p>
-                          );
+                          )
                         } else if (typeof fieldValue === 'string' || typeof fieldValue === 'number') {
                           return (
                             <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
                               {getFieldName(fieldKey)}: {fieldValue}
                             </p>
-                          );
+                          )
                         }
-                        return null;
+    
+                        return null
                       })}
                     </div>
-                    <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                      ${parseFloat(value.total_ventas).toFixed(2)}
-                    </div>
+                    {/* Mostrar total de ventas solo si nameGraph no es "inventario" */}
+                    {nameGraph !== 'Valores de Inventario' && (
+                      <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                        ${parseFloat(value.total_ventas).toFixed(2)}
+                      </div>
+                    )}
                   </div>
                 </li>
-              );
+              )
             })}
           </ul>
         </div>
       </div>
-    );
-  };
+    )
+    
+  }
   
 
   const backRouter = (e) => {
