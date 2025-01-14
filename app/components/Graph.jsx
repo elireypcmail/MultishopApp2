@@ -190,7 +190,7 @@ export default function Graph() {
     const isTopDay = nameGraph.includes('Día más Exitoso') || nameGraph.includes('Valores de Inventario')
 
     // Lista de KPIs para los cuales NO mostrar la fecha
-    const hideDateForKPI = ['Venta más Exitosa', 'Productos más vendidos', 'Fabricantes con más Ventas', 'Cajeros con más Venta']
+    const hideDateForKPI = ['Productos más vendidos', 'Fabricantes con más Ventas', 'Cajeros con más Venta']
     
     return (
       <div className="statistical-data w-full max-w-md p-6">
@@ -223,13 +223,17 @@ export default function Graph() {
                             </p>
                           )
                         } else if (typeof fieldValue === 'string' || typeof fieldValue === 'number') {
+                          const formattedValue = !isNaN(Number(fieldValue))
+                            ? Number(fieldValue).toLocaleString('es-ES')
+                            : fieldValue;
+                        
                           return (
                             <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
-                              {getFieldName(fieldKey)}: {fieldValue}
+                              {getFieldName(fieldKey)}: {formattedValue}
                             </p>
-                          )
+                          );
                         }
-    
+                        
                         return null
                       })}
                     </div>
