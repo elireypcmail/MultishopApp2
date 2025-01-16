@@ -182,5 +182,12 @@
         margin-top: 1.2rem;
       }
     }
+
+    .found-winner{
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 15vh;
+    }
   }
 }

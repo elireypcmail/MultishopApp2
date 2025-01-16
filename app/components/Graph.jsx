@@ -11,7 +11,8 @@ import {
   Moon, 
   NotFound, 
   ArrowLeft, 
-  Options 
+  Options,
+  Winner
 } from './Icons'
 
 export default function Graph() {
@@ -194,6 +195,16 @@ export default function Graph() {
     
     return (
       <div className="statistical-data w-full max-w-md p-6">
+        {/* Mostrar total de ventas solo si nameGraph no es "inventario" */}
+        {(nameGraph == 'Día más Exitoso' || nameGraph == "Venta más Exitosa") && (
+          <div className='found-winner'>
+            <div>
+              <Winner />
+            </div>
+          </div>
+        )}
+
+
         <div className="flow-root">
           <ul role="list" className="divide-y">
             {dataEntries.map(([key, value]) => {
@@ -240,8 +251,8 @@ export default function Graph() {
                     {/* Mostrar total de ventas solo si nameGraph no es "inventario" */}
                     {nameGraph !== 'Valores de Inventario' && (
                       <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                        ${parseFloat(value.total_ventas).toFixed(2)}
-                      </div>
+                        {`$${parseFloat(value.total_ventas).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                      </div>                    
                     )}
                   </div>
                 </li>
