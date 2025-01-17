@@ -12,7 +12,8 @@ import {
   NotFound, 
   ArrowLeft, 
   Options,
-  Winner
+  Winner,
+  WinnerSale
 } from './Icons'
 
 export default function Graph() {
@@ -183,7 +184,10 @@ export default function Graph() {
         total_usdca_inv: 'Valor Inventario USD CA',
         total_usdcp_inv: 'Valor Inventario USD CP', 
         total_bsca_inv: 'Valor Inventario BS CA', 
-        total_bscp_inv: 'Valor Inventario BS CP' 
+        total_bscp_inv: 'Valor Inventario BS CP',
+        clientesa: 'Clientes Atendidos', 
+        clientesf: 'Clientes Frecuentes', 
+        clientesn: 'Clientes Nuevos' 
       }
       return fieldNames[key] || key
     }
@@ -196,10 +200,17 @@ export default function Graph() {
     return (
       <div className="statistical-data w-full max-w-md p-6">
         {/* Mostrar total de ventas solo si nameGraph no es "inventario" */}
-        {(nameGraph == 'Día más Exitoso' || nameGraph == "Venta más Exitosa") && (
+        {(nameGraph == 'Día más Exitoso') && (
           <div className='found-winner'>
             <div>
               <Winner />
+            </div>
+          </div>
+        )}
+        {(nameGraph == "Venta más Exitosa") && (
+          <div className='found-winner'>
+            <div>
+              <WinnerSale/>
             </div>
           </div>
         )}
@@ -304,7 +315,11 @@ export default function Graph() {
               <div className="graph__header__title">{nameGraph}</div>
               <div className="graph__header__data">
                 <span>Periodo: {dateGraph}</span>
-                <span>Tipo de presentación de datos: {typeRange}</span>
+                {/* {(nameGraph !== "Fabricantes con más Ventas") && ( */}
+                  {/* <div> */}
+                    <span>Tipo de presentación de datos: {typeRange}</span>
+                  {/* </div> */}
+                {/* )} */}
               </div>
             </div>
           </div>
