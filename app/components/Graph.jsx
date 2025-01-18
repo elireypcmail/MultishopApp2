@@ -28,6 +28,8 @@ export default function Graph() {
   const [category, setCategory] = useState('')
   const [typeRange, setTypeRange] = useState('')
 
+  console.log(dateGraph)
+
   useEffect(() => {
     const savedDarkMode = localStorage.getItem('darkMode') === 'true'
     setDarkMode(savedDarkMode)
@@ -102,9 +104,9 @@ export default function Graph() {
       } else {
         typeRange = 'Mensual'
 
-        if(res == "Día más Exitoso" || res == "Cajeros con más Venta" || res == "Fabricantes con más Ventas" ){
-          res = `${res} - TOP 10`
-        }
+        // if(res == "Día más Exitoso" || res == "Cajeros con más Venta" || res == "Fabricantes con más Ventas" ){
+        //   res = `${res} - TOP 10`
+        // }
       }
   
       setNameGraph(res)
@@ -239,11 +241,20 @@ export default function Graph() {
                         if (fieldKey === 'fecha' && hideDateForKPI.includes(nameGraph)) return null
     
                         if (fieldKey === 'fecha') {
+                          console.log('Fecha:', fieldValue);
+                          
+                          // Convertir la fecha a un objeto Date
+                          const date = new Date(fieldValue);
+                          
+                          // Asegurarse de que la fecha esté en formato 'YYYY-MM-DD'
+                          const isoDate = date.toISOString().split('T')[0]; // Esto te dará 'YYYY-MM-DD'
+                          console.log(isoDate);
+                          
                           return (
                             <p key={fieldKey} className="text-sm text-gray-500 truncate dark:text-gray-400">
-                              {getFieldName(fieldKey)}: {new Date(fieldValue).toLocaleDateString()}
+                              {getFieldName(fieldKey)}: {isoDate} {/* Usar la fecha en formato 'YYYY-MM-DD' */}
                             </p>
-                          )
+                          );
                         } else if (typeof fieldValue === 'string' || typeof fieldValue === 'number') {
                           const formattedValue = !isNaN(Number(fieldValue))
                             ? Number(fieldValue).toLocaleString('es-ES')
@@ -255,6 +266,7 @@ export default function Graph() {
                             </p>
                           );
                         }
+                        
                         
                         return null
                       })}
@@ -315,11 +327,11 @@ export default function Graph() {
               <div className="graph__header__title">{nameGraph}</div>
               <div className="graph__header__data">
                 <span>Periodo: {dateGraph}</span>
-                {/* {(nameGraph !== "Fabricantes con más Ventas") && ( */}
-                  {/* <div> */}
+                {(nameGraph !== "Día más Exitoso") || (nameGraph !== "Venta más Exitosa") || (nameGraph !== "Cajeros con más Venta") || (nameGraph !== "Fabricantes con más Ventas") || (nameGraph !== "Productos más vendidos") || (nameGraph !== "Valores de Inventario") && (
+                  <div>
                     <span>Tipo de presentación de datos: {typeRange}</span>
-                  {/* </div> */}
-                {/* )} */}
+                  </div>
+                )}
               </div>
             </div>
           </div>
