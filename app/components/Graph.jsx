@@ -327,7 +327,14 @@ export default function Graph() {
               <div className="graph__header__title">{nameGraph}</div>
               <div className="graph__header__data">
                 <span>Periodo: {dateGraph}</span>
-                {(nameGraph !== "Día más Exitoso") || (nameGraph !== "Venta más Exitosa") || (nameGraph !== "Cajeros con más Venta") || (nameGraph !== "Fabricantes con más Ventas") || (nameGraph !== "Productos más vendidos") || (nameGraph !== "Valores de Inventario") && (
+                {(
+                  nameGraph !== "Día más Exitoso" &&
+                  nameGraph !== "Venta más Exitosa" &&
+                  nameGraph !== "Cajeros con más Venta" &&
+                  nameGraph !== "Fabricantes con más Ventas" &&
+                  nameGraph !== "Productos más vendidos" &&
+                  nameGraph !== "Valores de Inventario"
+                ) && (
                   <div>
                     <span>Tipo de presentación de datos: {typeRange}</span>
                   </div>
