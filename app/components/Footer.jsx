@@ -21,17 +21,17 @@ export default function FooterGraph() {
     <footer className="menu">
       <div className="menu-item">
         <span className="link">
-          <Link href={'/date'}>
+          <Link href={''}>
             <CalendarRange />
           </Link>
         </span>
         <span className="link">
-          <Link href={'/category'}>
+          <Link href={''}>
             <CategoryGraph />
           </Link>
         </span>
         <span className="link">
-          <Link href={'/listkpi'}>
+          <Link href={''}>
             <CategoryList />
           </Link>
         </span>

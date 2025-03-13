@@ -51,6 +51,28 @@
         animation: fadeOutBackground 0.3s ease-out forwards;
       }
       
+      .modal-login-loading {
+        display: flex;
+        flex-direction: column;
+        width: 60%;
+        height: 30%;
+        border-radius: 20px;
+        justify-content: center;
+        align-items: center;
+        background-color: #00000000;
+        position: absolute;
+        animation: spin 0.5s linear infinite;
+      }
+      
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      
       @keyframes fadeIn {
         from {
           opacity: 0;

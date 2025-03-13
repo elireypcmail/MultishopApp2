@@ -1,32 +1,28 @@
-import { useRouter }         from 'next/router'
-import multishop             from "@p/Logo Sistema Multishop Pequeno.png"
-import Image                 from "next/image"
-import FooterGraph           from './Footer'
-import instance              from '@g/api'
+import { useRouter } from 'next/router'
+import multishop from "@p/Logo Sistema Multishop Pequeno.png"
+import Image from "next/image"
+import FooterGraph from './Footer'
+import instance from '@g/api'
 import { defaultChartTypes } from '@conf/defaultChartTypes'
-import { getCookie }         from '@a/globals/cookies'
-import React, 
-  { useState, useEffect } 
-from 'react'
-import { 
-  ArrowLeft, 
-  Sun, 
-  Moon 
-} 
-from './Icons'
+import { getCookie } from '@a/globals/cookies'
+import React, { useState, useEffect } from 'react'
+import { ArrowLeft, Sun, Moon, ReloadIcon } from './Icons'
 
 const Modal = () => {
   const router = useRouter()
-  const [category, setCategory]                         = useState('')
+  const [category, setCategory] = useState('')
   const [currentSelectedGraph, setCurrentSelectedGraph] = useState('')
-  const [selectedGraphType, setSelectedGraphType]       = useState(null)
-  const [darkMode, setDarkMode]                         = useState(false)
-  const [isDataFetched, setIsDataFetched]               = useState(false)
-  const [chartData, setChartData]                       = useState([])
-  const [instanciaUser, setInstanciaUser]               = useState('')
-  const [noDataMessage, setNoDataMessage]               = useState('')
-  const [defaultGraphType, setDefaultGraphType]         = useState('Torta')
-  
+  const [selectedGraphType, setSelectedGraphType] = useState(null)
+  const [darkMode, setDarkMode] = useState(false)
+  const [isDataFetched, setIsDataFetched] = useState(false)
+  const [chartData, setChartData] = useState([])
+  const [instanciaUser, setInstanciaUser] = useState('')
+  const [noDataMessage, setNoDataMessage] = useState('')
+  const [defaultGraphType, setDefaultGraphType] = useState('Torta')
+  const [modalState, setModalState] = useState({ open: false, message: '', status: '' });
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false) // Agregar estado para deshabilitar el botón
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const savedCategory = router.query.category || localStorage.getItem('selectedCategory')
     setCategory(savedCategory || '')
@@ -45,6 +41,18 @@ const Modal = () => {
       console.log('Valor de la cookie instancia:', cookieValue)
     }
   }, [])
+
+  useEffect(() => {
+    const handleRouteChangeComplete = () => {
+      setIsLoading(false);
+      setModalState({ open: false, message: '', status: '' });
+    };
+
+    router.events.on('routeChangeComplete', handleRouteChangeComplete);
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChangeComplete);
+    };
+  }, [router]);
 
   useEffect(() => {
     if (darkMode) {
@@ -77,30 +85,31 @@ const Modal = () => {
     switch (category) {
       case 'Financieros':
         return [
-          { name: 'Ventas en USD',      value: 'totalventa' },
-          { name: 'Utilidad',           value: 'totalut' },
-          { name: 'Ticket de Venta',    value: 'ticketDeVenta' },
-          { name: 'Costo de Venta',     value: 'totalcosto' },
+          { name: 'Ventas en USD', value: 'totalventa' },
+          { name: 'Utilidad', value: 'totalut' },
+          { name: 'Ticket de Venta', value: 'ticketDeVenta' },
+          { name: 'Costo de Venta', value: 'totalcosto' },
           { name: 'Margen de Utilidad', value: 'margenDeUtilidad' },
+          { name: 'Análisis de Ventas vs Compras', value: 'ventasVScompras' },
         ]
       case 'Operativos':
         return [
-          { name: 'Unidades Vendidas',           value: 'cantidadund' },
-          { name: 'Facturas Emitidas',           value: 'cantidadfac' },
-          { name: 'Unidades en Bolsa',           value: 'unidadesVendidas' },
+          { name: 'Unidades Vendidas', value: 'cantidadund' },
+          { name: 'Facturas Emitidas', value: 'cantidadfac' },
+          { name: 'Unidades en Bolsa', value: 'unidadesVendidas' },
           { name: 'Valor Promedio de la Unidad', value: 'valorDeLaUnidadPromedio' },
-          { name: 'Clientes Atendidos',          value: 'clientesa' },
-          { name: 'Clientes Frecuentes',         value: 'clientesf' },
-          { name: 'Clientes Nuevos',             value: 'clientesn' },
+          { name: 'Clientes Atendidos', value: 'clientesa' },
+          { name: 'Clientes Frecuentes', value: 'clientesf' },
+          { name: 'Clientes Nuevos', value: 'clientesn' },
         ]
       case 'Estadísticos':
         return [
-          { name: 'Día más Exitoso',            value: 'DiaMasExitoso' },
-          { name: 'Venta más Exitosa',          value: 'VentaMasExitosa' },
-          { name: 'Cajeros con más Venta',      value: 'CajerosConMasVentas' },
+          { name: 'Día más Exitoso', value: 'DiaMasExitoso' },
+          { name: 'Venta más Exitosa', value: 'VentaMasExitosa' },
+          { name: 'Cajeros con más Venta', value: 'CajerosConMasVentas' },
           { name: 'Fabricantes con más Ventas', value: 'FabricantesConMasVentas' },
-          { name: 'Productos más vendidos',     value: 'ProductosTOP' },
-          { name: 'Valores de Inventario',     value: 'Inventario' },
+          { name: 'Productos más vendidos', value: 'ProductosTOP' },
+          { name: 'Valores de Inventario', value: 'Inventario' },
         ]
       default:
         return []
@@ -108,12 +117,12 @@ const Modal = () => {
   }
 
   const handleItemClick = (graph) => {
-    localStorage.setItem('selectedGraph',     graph.value)
+    localStorage.setItem('selectedGraph', graph.value)
     localStorage.setItem('selectedGraphName', graph.name)
-    localStorage.setItem('selectedCategory',  category)
-    
+    localStorage.setItem('selectedCategory', category)
+
     setCurrentSelectedGraph(graph.value)
-    
+
     const graphType = category === 'Estadísticos' ? 'Texto' : (defaultChartTypes[graph.name] || defaultGraphType)
     setSelectedGraphType(graphType)
     localStorage.setItem('selectedGraphType', graphType)
@@ -125,51 +134,71 @@ const Modal = () => {
       return
     }
   
-    const dateRange    = JSON.parse(localStorage.getItem('dateRange'))
+    setModalState({ open: true, message: 'Cargando...', status: 'loading' });
+  
+    let typeCompanies = localStorage.getItem('typeCompanies')
+    const dateRange = JSON.parse(localStorage.getItem('dateRange'))
     const { from, to } = dateRange
-
-    const fromDate = new Date(dateRange.from).toLocaleDateString('en-CA')
-    const toDate   = new Date(dateRange.to).toLocaleDateString('en-CA')
+  
+    const fromDate = new Date(from).toLocaleDateString('en-CA')
+    const toDate = new Date(to).toLocaleDateString('en-CA')
   
     try {
       const endpoint = category === 'Estadísticos' ? '/kpi/custom' : '/filter-data'
       const response = await instance.post(endpoint, {
-        nombreCliente: instanciaUser, 
+        nombreCliente: instanciaUser,
         nombreTabla: 'ventas',
         fechaInicio: from,
         fechaFin: to,
         kpi: localStorage.getItem('selectedGraph'),
+        typeCompanies: typeCompanies,
       })
-
+  
       if (response.data && (response.data.results || response.data.length > 0)) {
         const chartDataWithDateRange = {
           ...response.data,
           dateRange: { from, to }
         }
-
+  
+        setModalState({ open: true, message: 'Kpi encontrado', status: 'success' });
+  
         localStorage.setItem('chartData', JSON.stringify(chartDataWithDateRange))
         setChartData(chartDataWithDateRange)
         setNoDataMessage('')
+        setIsDataFetched(true)
+  
+        await router.push('/graph')  // Espera a que la navegación se complete
+        setModalState({ open: false, message: '', status: '' }) // Cierra el modal solo cuando haya terminado la navegación
+  
       } else {
-        setNoDataMessage(`No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
-        localStorage.setItem('noDataMessage', `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
-        setChartData([])
+        handleNoDataMessage(fromDate, toDate)
       }
-      
-      setIsDataFetched(true)
-      router.push('/graph')
+  
     } catch (error) {
       console.error('Error fetching chart data:', error)
-      setNoDataMessage(`No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
-      localStorage.setItem('noDataMessage', `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
-      setIsDataFetched(true)
-      router.push('/graph')
+      handleNoDataMessage(fromDate, toDate)
     }
   }
-
+  
+  // Función auxiliar para manejar el mensaje de "No hay datos"
+  const handleNoDataMessage = (fromDate, toDate) => {
+    const message = `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`
+    setNoDataMessage(message)
+    localStorage.setItem('noDataMessage', message)
+    setChartData([])
+    setModalState({ open: false, message: '', status: '' }) // Asegura que el modal se cierre en este caso
+    setIsButtonDisabled(false)
+  }
+  
   const handleSearchGraph = async (e) => {
     e.preventDefault()
+    setIsButtonDisabled(true) // Deshabilitar el botón
     await handleFetchChartData()
+    setModalState({ open: false, message: '', status: '' });
+    setIsButtonDisabled(false);
+    setTimeout(() => {
+      setIsButtonDisabled(false) // Volver a habilitar el botón después de 5 segundos
+    }, 5000)
   }
 
   const handleClose = () => { router.push('/category') }
@@ -222,12 +251,18 @@ const Modal = () => {
                   <span>Atrás</span>
                 </div>
               </button>
-              <button onClick={handleSearchGraph} disabled={!currentSelectedGraph}>
+              <button onClick={handleSearchGraph} disabled={isButtonDisabled || !currentSelectedGraph}>
                 {category === 'Estadísticos' ? 'Ver estadística' : 'Ver gráfico'}
               </button>
             </div>
           </div>
         </div>
+
+        {modalState.open && modalState.status === 'loading' && (
+          <div className="modal-login-loading">
+            <ReloadIcon className="icon-loading" />
+          </div>
+        )}
 
         <FooterGraph />
       </div>

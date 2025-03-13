@@ -40,6 +40,8 @@ interface DataItem {
   periodo: string;
   total_valor: string;
   promedio_valor: string;
+  kpiType: string;
+  nomemp: string;
 }
 
 interface LineChartComponentProps {
@@ -50,6 +52,8 @@ interface LineChartComponentProps {
 export default function LineChartComponent({ data, dateRange }: LineChartComponentProps) {
   const [name, setName] = useState('')
   const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 300 })
+  const [nameCompany, setNameCompany] = useState("")
+  const [typeCompanies, setTypeCompanies] = useState("")
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,6 +61,11 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
     
     const graphName = localStorage.getItem("selectedGraphName")
     setName(graphName || '')
+
+    setNameCompany(data[0]?.nomemp);
+
+    const savedTypeCompanies = localStorage.getItem("typeCompanies");
+    setTypeCompanies(savedTypeCompanies || "");
   }, [data])
 
   useEffect(() => {
@@ -105,6 +114,18 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
 
   return (
     <Card ref={cardRef}>
+      {typeCompanies !== "Multiple" && (
+        <div
+          style={{
+            textAlign: "center",
+            fontSize: "17px",
+            fontWeight: 500,
+            marginTop: "10px",
+          }}
+        >
+          {nameCompany}
+        </div>
+      )}
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart

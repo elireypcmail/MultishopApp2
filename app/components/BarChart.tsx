@@ -1,40 +1,45 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useRef, useMemo } from "react"
-import { TrendingUp, DollarSign }               from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis }  from "recharts"
+import { useEffect, useState, useRef, useMemo } from "react";
+import { TrendingUp, DollarSign } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@comp/card"
+import { Card, CardContent, CardFooter } from "@comp/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@comp/chart"
+} from "@comp/chart";
 
 const chartConfig = {
   desktop: {
     label: "Total",
     color: "hsl(var(--chart-1))",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
+
+const generateBlueShades = (count: number) => {
+  return Array.from(
+    { length: count },
+    (_, i) => `hsl(210, 100%, ${Math.max(10, 50 - i * (40 / (count - 1)))}%)`
+  );
+};
 
 const formatNumber = (value: number) => {
-  return new Intl.NumberFormat('es-ES', {
+  return new Intl.NumberFormat("es-ES", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-    useGrouping: true
+    useGrouping: true,
   }).format(value);
-}
+};
 
 interface DataItem {
   periodo: string;
   total_valor: string;
   promedio_valor: string;
+  kpiType: string;
+  nomemp: string;
 }
 
 interface BarChartComponentProps {
@@ -42,64 +47,105 @@ interface BarChartComponentProps {
   dateRange: { from: string; to: string };
 }
 
-export default function BarChartComponent({ data, dateRange }: BarChartComponentProps) {
-  const [name, setName] = useState('')
-  const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 300 })
-  const cardRef = useRef<HTMLDivElement>(null)
+export default function BarChartComponent({
+  data,
+  dateRange,
+}: BarChartComponentProps) {
+  const [name, setName] = useState("")
+  const [kpiType, setkpiType] = useState("")
+  const [company, setCompany] = useState("")
+  const [valueVentas, setValueVentas] = useState(0)
+  const [valueCompras, setValueCompras] = useState(0)
+  const [typeCompanies, setTypeCompanies] = useState("")
+  const [chartDimensions, setChartDimensions] = useState({
+    width: 0,
+    height: 300,
+  });
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log('BarChartComponent: Received data:', data)
-    
-    const graphName = localStorage.getItem("selectedGraphName")
-    setName(graphName || '')
-  }, [data])
+    console.log("PieChartComponent: Received data:", data);
+
+    let kpiType = data[0]?.kpiType;
+
+    if (kpiType) {
+      setValueVentas(parseFloat(data[0]?.total_valor));
+      setValueCompras(parseFloat(data[1]?.total_valor));
+      setkpiType(kpiType || "");
+    }
+
+    const graphName = localStorage.getItem("selectedGraphName");
+    setName(graphName || "");
+
+    setCompany(data[0]?.nomemp);
+
+    const savedTypeCompanies = localStorage.getItem("typeCompanies");
+    setTypeCompanies(savedTypeCompanies || "");
+  }, [data]);
 
   useEffect(() => {
     const updateChartDimensions = () => {
       if (cardRef.current) {
-        const { width } = cardRef.current.getBoundingClientRect()
-        setChartDimensions({ width, height: 300 })
+        const { width } = cardRef.current.getBoundingClientRect();
+        setChartDimensions({ width, height: 300 });
       }
-    }
+    };
 
-    updateChartDimensions()
-    window.addEventListener('resize', updateChartDimensions)
+    updateChartDimensions();
+    window.addEventListener("resize", updateChartDimensions);
 
-    return () => window.removeEventListener('resize', updateChartDimensions)
-  }, [])
+    return () => window.removeEventListener("resize", updateChartDimensions);
+  }, []);
 
   const formattedData = useMemo(() => {
     if (Array.isArray(data) && data.length > 0) {
-      console.log('BarChartComponent: Processing data...')
-      const sortedData = [...data].sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime())
-      
-      const formatted = sortedData.map(item => ({
-        period:   item.periodo,
-        total:    parseFloat(item.total_valor),
-        promedio: parseFloat(item.promedio_valor),
-      }))
+      console.log("BarChartComponent: Processing data...");
+      const sortedData = [...data].sort(
+        (a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime()
+      );
+      const blueShades = generateBlueShades(sortedData.length);
 
-      console.log('BarChartComponent: Formatted Data:', formatted)
-      return formatted
+      const formatted = sortedData.map((item, index) => ({
+        period: item.periodo,
+        total: parseFloat(item.total_valor),
+        promedio: parseFloat(item.promedio_valor),
+        fill: blueShades[index],
+      }));
+
+      console.log("BarChartComponent: Formatted Data:", formatted);
+      return formatted;
     }
-    console.warn('BarChartComponent: Invalid or empty data received')
-    return []
-  }, [data])
-  
-  console.log('BarChartComponent: Final formatted data:', formattedData)
+    console.warn("BarChartComponent: Invalid or empty data received");
+    return [];
+  }, [data]);
+
+  console.log("BarChartComponent: Final formatted data:", formattedData);
 
   const totalGeneral = useMemo(() => {
-    return formattedData.reduce((sum, item) => sum + item.total, 0)
-  }, [formattedData])
+    return formattedData.reduce((sum, item) => sum + item.total, 0);
+  }, [formattedData]);
 
   const promedioTotal = useMemo(() => {
-    return formattedData.length > 0 ? totalGeneral / formattedData.length : 0
-  }, [formattedData, totalGeneral])
-  
-  if (!data || data.length === 0) return <div>No hay datos disponibles para mostrar.</div> 
+    return formattedData.length > 0 ? totalGeneral / formattedData.length : 0;
+  }, [formattedData, totalGeneral]);
+
+  if (!data || data.length === 0)
+    return <div>No hay datos disponibles para mostrar.</div>;
 
   return (
     <Card ref={cardRef}>
+      {typeCompanies !== "Multiple" && (
+        <div
+          style={{
+            textAlign: "center",
+            fontSize: "17px",
+            fontWeight: 500,
+            marginTop: "10px",
+          }}
+        >
+          {company}
+        </div>
+      )}
       <CardContent>
         <ChartContainer config={chartConfig}>
           <BarChart
@@ -119,10 +165,10 @@ export default function BarChartComponent({ data, dateRange }: BarChartComponent
               tickLine={false}
               axisLine={false}
               tickMargin={30}
-              angle={-45}
-              textAnchor="end"
+              angle={-35}
+              textAnchor="middle"
               interval={0}
-              tick={{ fontSize: 10 }}
+              tick={{ fontSize: 12 }}
             />
             <ChartTooltip
               cursor={false}
@@ -137,16 +183,47 @@ export default function BarChartComponent({ data, dateRange }: BarChartComponent
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
-        <div className="flex items-center gap-2 font-medium leading-none">
-          <TrendingUp className="h-4 w-4" /> Promedio diario: {formatNumber(promedioTotal)} 
-        </div>
-        <div className="flex items-center gap-2 font-medium leading-none">
-          <DollarSign className="h-4 w-4" /> Total general: {formatNumber(totalGeneral)}
-        </div>
-        <div className="flex items-center gap-2 leading-none text-muted-foreground">
-          {new Date(dateRange.from).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })} - {new Date(dateRange.to).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
-        </div>
+        {kpiType == "ventasVScompras" ? (
+          <>
+            <div className="flex items-center gap-2 font-medium leading-none">
+              <div
+                className="w-4 h-4 rounded-sm"
+                style={{ backgroundColor: "#0080ff" }}
+              />
+              Total Ventas : {formatNumber(valueVentas)}
+            </div>
+            <div className="flex items-center gap-2 font-medium leading-none">
+              <div
+                className="w-4 h-4 rounded-sm"
+                style={{ backgroundColor: "#001a33" }}
+              />
+              Total Compras : {formatNumber(valueCompras)}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2 font-medium leading-none">
+              <TrendingUp className="h-4 w-4" /> Promedio diario:{" "}
+              {formatNumber(promedioTotal)}
+            </div>
+            <div className="flex items-center gap-2 font-medium leading-none">
+              <DollarSign className="h-4 w-4" /> Total general:{" "}
+              {formatNumber(totalGeneral)}
+            </div>
+            <div className="flex items-center gap-2 leading-none text-muted-foreground">
+              {new Date(dateRange.from).toLocaleDateString("es-ES", {
+                month: "long",
+                year: "numeric",
+              })}{" "}
+              -{" "}
+              {new Date(dateRange.to).toLocaleDateString("es-ES", {
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
+          </>
+        )}
       </CardFooter>
     </Card>
-  )
+  );
 }

@@ -97,6 +97,19 @@
     }
   }
 
+  .button-selectComp {
+    background-color: #4487B2;
+    padding: 8px;
+    color: white;
+    font-family: title;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+
   .modal, .modal2 {
     position: fixed;
     top: 0;
@@ -116,6 +129,30 @@
 
     li{
       margin-top: 19px;
+    }
+  }
+
+  .modal-login-loading {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    height: 30%;
+    border-radius: 20px;
+    justify-content: center;
+    align-items: center;
+    // background-color: #000000;
+    position: absolute;
+    top: 30%;
+    left: 20%;
+    animation: spin 0.5s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
     }
   }
   
