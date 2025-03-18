@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import { setCookie } from '@g/cookies';
 import { loginUser, verifyToken } from '@api/Post';
 import { UserLogin, Identificacion, Clave, HidePassword, VisiblePassword, ReloadIcon } from '@c/Icons';
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function Login() {
   const [cliente, setCliente] = useState({ login_user: '', clave: '' });
@@ -12,6 +13,9 @@ export default function Login() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [modalState, setModalState] = useState({ open: false, message: '', status: '' });
   const { push } = useRouter();
+
+  const notifyError   = (msg) => { toast.error(msg) }
+  const notifySucces  = (msg) => { toast.success(msg) }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,6 +36,7 @@ export default function Login() {
           localStorage.setItem('defaultGraphType', res.type_graph);
           localStorage.setItem('typeCompanies', res.type_comp);
           setModalState({ open: true, message: '¡Haz iniciado sesión!', status: 'success' });
+          notifySucces('Haz iniciado sesión!')
           
           setTimeout(() => {
             push('/date').then(() => {
@@ -41,12 +46,14 @@ export default function Login() {
           }, 500);
         } else if (tokenRes.message === 'El token ha expirado') {
           setModalState({ open: true, message: 'Su suscripción ha caducado, comuníquese con los administradores.', status: 'error' });
+          notifyError('Su suscripción ha caducado, comunícate con los administradores.')
         } else if (tokenRes.message.startsWith('A partir de hoy te quedan')) {
           console.error('Error al verificar el token:', tokenRes.message);
         }
       }
     } catch (error) {
       setModalState({ open: true, message: error?.response?.data?.message || 'Error en la solicitud.', status: 'error' });
+      notifyError(error?.response?.data?.message)
       console.error('Error en la solicitud:', error);
       setTimeout(() => {
         setModalState({ open: false, message: '', status: '' });
@@ -61,6 +68,7 @@ export default function Login() {
 
   return (
     <div className="body">
+      <Toaster position="top-right" reverseOrder={true} duration={5000} />
       <div className="container">
         <div className="container-form">
           <div className="user">

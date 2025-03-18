@@ -101,6 +101,7 @@ const Modal = () => {
           { name: 'Clientes Atendidos', value: 'clientesa' },
           { name: 'Clientes Frecuentes', value: 'clientesf' },
           { name: 'Clientes Nuevos', value: 'clientesn' },
+          { name: 'Flujo de Caja', value: 'flujoDeCaja' }
         ]
       case 'Estadísticos':
         return [
@@ -143,8 +144,13 @@ const Modal = () => {
     const fromDate = new Date(from).toLocaleDateString('en-CA')
     const toDate = new Date(to).toLocaleDateString('en-CA')
   
+    const kpiSelected = localStorage.getItem('selectedGraph')
+
     try {
-      const endpoint = category === 'Estadísticos' ? '/kpi/custom' : '/filter-data'
+      // const endpoint = category === 'Estadísticos' ? '/kpi/custom' : '/filter-data'
+      const endpoint = (category === 'Estadísticos' || kpiSelected === 'flujoDeCaja') 
+      ? '/kpi/custom' 
+      : '/filter-data';
       const response = await instance.post(endpoint, {
         nombreCliente: instanciaUser,
         nombreTabla: 'ventas',

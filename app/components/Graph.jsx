@@ -20,6 +20,7 @@ import {
   Inventory,
   Boxes,
   Employee,
+  Earnings
 } from "./Icons";
 
 export default function Graph() {
@@ -142,6 +143,12 @@ export default function Graph() {
     const chartData = chartDataState.results || chartDataState;
 
     let selectedGraph = localStorage.getItem("selectedGraph");
+
+    console.log(selectedGraph)
+
+    if (selectedGraph === "flujoDeCaja") return renderStatisticalData();
+
+
     let typeCompanies = localStorage.getItem("typeCompanies");
 
     if (selectedGraph == "ventasVScompras" || typeCompanies == "Multiple") {
@@ -244,6 +251,9 @@ export default function Graph() {
         clientesf: "Clientes Frecuentes",
         clientesn: "Clientes Nuevos",
         nomemp: "Empresa",
+        totusd: "Total Dolares",
+        totcop: "Total Pesos",
+        totbs: "Total Bs",
       };
       return fieldNames[key] || key;
     };
@@ -257,6 +267,7 @@ export default function Graph() {
       "Productos más vendidos",
       "Fabricantes con más Ventas",
       "Cajeros con más Venta",
+      "Flujo de Caja"
     ];
 
     const hideNomempForKPI = [
@@ -265,6 +276,7 @@ export default function Graph() {
       "Cajeros con más Venta",
       "Valores de Inventario",
       "Cajeros con más venta",
+      "Flujo de Caja"
     ];
 
     const hideCompanySelectorForKPI = ["Día más Exitoso", "Venta más Exitosa"];
@@ -347,6 +359,13 @@ export default function Graph() {
           <div className="found-winner">
             <div>
               <Inventory />
+            </div>
+          </div>
+        )}
+        {nameGraph == "Flujo de Caja" && (
+          <div className="found-winner">
+            <div>
+              <Earnings />
             </div>
           </div>
         )}
@@ -501,7 +520,7 @@ export default function Graph() {
                           }
                         })}
                       </div>
-                      {nameGraph !== "Valores de Inventario" && (
+                      {nameGraph !== "Valores de Inventario" && nameGraph !== "Flujo de Caja" && (
                         <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
                           {`$${parseFloat(value.total_ventas).toLocaleString(
                             "es-ES",
@@ -574,6 +593,7 @@ export default function Graph() {
                   nameGraph !== "Productos más vendidos" &&
                   nameGraph !== "Valores de Inventario" &&
                   nameGraph !== "Análisis de Ventas vs Compras" &&
+                  nameGraph !== "Flujo de Caja" &&
                   (typeCompanies !== "Multiple" ? (
                     <div>
                       <span>Tipo de presentación de datos: {typeRange}</span>
