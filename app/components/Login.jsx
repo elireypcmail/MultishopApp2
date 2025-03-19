@@ -47,7 +47,7 @@ export default function Login() {
         } else if (tokenRes.message === 'El token ha expirado') {
           setModalState({ open: true, message: 'Su suscripción ha vencido. Por favor realice la renovación. Contáctenos', status: 'error' });
           notifyError('Su suscripción ha vencido. Por favor realice la renovación. Contáctenos')
-        } else if (tokenRes.message.startsWith('Faltan ')) {
+        } else if (tokenRes.message.startsWith('Faltan ') || tokenRes.message.startsWith('Estas en periodo ')) {
           setModalState({ open: true, message: tokenRes.message , status: 'error' });
 
           setCookie('instancia', res.identificacion);
@@ -60,7 +60,7 @@ export default function Login() {
               setModalState({ open: false, message: '', status: '' });
               setIsButtonDisabled(false);
             });
-          }, 1000);
+          }, 3000);
         }
       }
     } catch (error) {
