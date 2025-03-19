@@ -30,7 +30,7 @@ export default function Login() {
     try {
       const res = await loginUser(cliente);
       if (res?.tokenCode) {
-        const tokenRes = await verifyToken(res.tokenCode);
+        const tokenRes = await verifyToken(res.tokenCode)
         if (tokenRes.message === 'Suscripción activa') {
           setCookie('instancia', res.identificacion);
           localStorage.setItem('defaultGraphType', res.type_graph);
@@ -45,10 +45,22 @@ export default function Login() {
             });
           }, 500);
         } else if (tokenRes.message === 'El token ha expirado') {
-          setModalState({ open: true, message: 'Su suscripción ha caducado, comuníquese con los administradores.', status: 'error' });
-          notifyError('Su suscripción ha caducado, comunícate con los administradores.')
-        } else if (tokenRes.message.startsWith('A partir de hoy te quedan')) {
-          console.error('Error al verificar el token:', tokenRes.message);
+          setModalState({ open: true, message: 'Su suscripción ha vencido. Por favor realice la renovación. Contáctenos', status: 'error' });
+          notifyError('Su suscripción ha vencido. Por favor realice la renovación. Contáctenos')
+        } else if (tokenRes.message.startsWith('Faltan ')) {
+          setModalState({ open: true, message: tokenRes.message , status: 'error' });
+
+          setCookie('instancia', res.identificacion);
+          localStorage.setItem('defaultGraphType', res.type_graph);
+          localStorage.setItem('typeCompanies', res.type_comp);
+          notifyError(tokenRes.message)
+          
+          setTimeout(() => {
+            push('/date').then(() => {
+              setModalState({ open: false, message: '', status: '' });
+              setIsButtonDisabled(false);
+            });
+          }, 1000);
         }
       }
     } catch (error) {
