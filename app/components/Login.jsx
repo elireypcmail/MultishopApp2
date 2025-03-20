@@ -47,20 +47,20 @@ export default function Login() {
         } else if (tokenRes.message === 'El token ha expirado') {
           setModalState({ open: true, message: 'Su suscripción ha vencido. Por favor realice la renovación. Contáctenos', status: 'error' });
           notifyError('Su suscripción ha vencido. Por favor realice la renovación. Contáctenos')
-        } else if (tokenRes.message.startsWith('Faltan ') || tokenRes.message.startsWith('Estas en periodo ')) {
+        } else if (tokenRes.message.startsWith('Faltan ') || tokenRes.message.startsWith('Su suscripción ')) {
           setModalState({ open: true, message: tokenRes.message , status: 'error' });
 
           setCookie('instancia', res.identificacion);
           localStorage.setItem('defaultGraphType', res.type_graph);
           localStorage.setItem('typeCompanies', res.type_comp);
-          notifyError(tokenRes.message)
+          notifySucces(tokenRes.message)
           
           setTimeout(() => {
             push('/date').then(() => {
               setModalState({ open: false, message: '', status: '' });
               setIsButtonDisabled(false);
             });
-          }, 3000);
+          }, 1000);
         }
       }
     } catch (error) {

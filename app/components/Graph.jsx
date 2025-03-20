@@ -505,9 +505,18 @@ export default function Graph() {
                             typeof fieldValue === "string" ||
                             typeof fieldValue === "number"
                           ) {
-                            const formattedValue = !isNaN(Number(fieldValue))
-                              ? Number(fieldValue).toLocaleString("es-ES")
-                              : fieldValue;
+                            // const formattedValue = !isNaN(parseFloat(fieldValue))
+                            // ? new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(fieldValue))
+                            // : fieldValue;
+                        
+                            const formatNumber = (value) => {
+                              if (isNaN(value) || value === "" || value === null) return value;
+                            
+                              const number = parseFloat(value).toFixed(2); // Asegura dos decimales
+                              return number.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/(\d+)\.(\d{2})$/, "$1,$2");
+                            };
+                            
+                            const formattedValue = formatNumber(fieldValue);
 
                             return (
                               <p
