@@ -182,7 +182,10 @@ const Modal = () => {
   
     } catch (error) {
       console.error('Error fetching chart data:', error)
-      handleNoDataMessage(fromDate, toDate)
+      setNoDataMessage(`No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
+      localStorage.setItem('noDataMessage', `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`)
+      setIsDataFetched(true)
+      router.push('/graph')
     }
   }
   
