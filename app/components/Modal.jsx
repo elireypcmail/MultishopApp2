@@ -159,7 +159,11 @@ const Modal = () => {
         kpi: localStorage.getItem('selectedGraph'),
         typeCompanies: typeCompanies,
       })
-  
+
+      const endpointDate = await instance.post(`/lastDateSincro`, {cliente : instanciaUser})
+      console.log(endpointDate.data.data)
+      localStorage.setItem('lastdateSincro', endpointDate.data.data)
+
       if (response.data && (response.data.results || response.data.length > 0)) {
         const chartDataWithDateRange = {
           ...response.data,

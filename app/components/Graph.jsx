@@ -107,7 +107,8 @@ export default function Graph() {
       const from = new Date(date.from);
       const to = new Date(date.to);
       const lastedFormated = lastest.toLocaleDateString("en-CA")
-      const hourFormated = hour.toLocaleTimeString("en-CA", {
+      const hourFormated = hour.toLocaleTimeString("en-US", {
+        timeZone: "UTC",
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
