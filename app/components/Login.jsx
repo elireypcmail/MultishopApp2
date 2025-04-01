@@ -35,6 +35,7 @@ export default function Login() {
           setCookie('instancia', res.identificacion);
           localStorage.setItem('defaultGraphType', res.type_graph);
           localStorage.setItem('typeCompanies', res.type_comp);
+          localStorage.setItem('lastdateSincro', res.lastdateSincro);
           setModalState({ open: true, message: '¡Haz iniciado sesión!', status: 'success' });
           notifySucces('Haz iniciado sesión!')
           
@@ -53,6 +54,7 @@ export default function Login() {
           setCookie('instancia', res.identificacion);
           localStorage.setItem('defaultGraphType', res.type_graph);
           localStorage.setItem('typeCompanies', res.type_comp);
+          localStorage.setItem('lastdateSincro', res.lastdateSincro);
           notifySucces(tokenRes.message)
           
           setTimeout(() => {

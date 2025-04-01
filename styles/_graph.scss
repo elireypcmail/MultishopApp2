@@ -34,14 +34,14 @@
           color: #428bb8;
           font-size: 1.4rem;
           font-family: text;
-          margin-top: 10px;
+          // margin-top: 5px;
           width: 97%;
         }
 
         .graph__header__data{
           display: flex;
           flex-direction: column;
-          margin-right: 20px;
+          margin-right: 18px;
           // margin-top: 10px;
           font-size: 1rem;
           color: rgba(0, 0, 0, 0.701);
@@ -85,8 +85,8 @@
       }
 
       .recharts-responsive-container{
-        margin-top: 19px;
-        min-height: 42vh;
+        // margin-top: 10px;
+        min-height: 40vh;
       }
 
       .recharts-surface, .recharts-wrapper{
