@@ -38,8 +38,8 @@ export default function Graph() {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [confirmedCompany, setConfirmedCompany] = useState(null);
   const [typeCompanies, setTypeCompanies] = useState("");
-  const [lastDateSincro, setLastDateSincro] = useState("");
-  const [lastDateSincroHour, setLastDateSincroHour] = useState("");
+  // const [lastDateSincro, setLastDateSincro] = useState("");
+  // const [lastDateSincroHour, setLastDateSincroHour] = useState("");
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -106,13 +106,13 @@ export default function Graph() {
       const hour = new Date(lastdateSincronizate)
       const from = new Date(date.from);
       const to = new Date(date.to);
-      const lastedFormated = lastest.toLocaleDateString("en-CA")
-      const hourFormated = hour.toLocaleTimeString("en-US", {
-        timeZone: "UTC",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })
+      // const lastedFormated = lastest.toLocaleDateString("en-CA")
+      // const hourFormated = hour.toLocaleTimeString("en-US", {
+      //   timeZone: "UTC",
+      //   hour: "2-digit",
+      //   minute: "2-digit",
+      //   hour12: true,
+      // })
       const fromFormatted = from.toLocaleDateString("en-CA");
       const toFormatted = to.toLocaleDateString("en-CA");
 
@@ -130,8 +130,8 @@ export default function Graph() {
 
       setNameGraph(res);
       setDateGraph(`${fromFormatted} / ${toFormatted}`);
-      setLastDateSincro(lastedFormated)
-      setLastDateSincroHour(hourFormated)
+      // setLastDateSincro(lastedFormated)
+      // setLastDateSincroHour(hourFormated)
       setTypeRange(typeRange);
     }
   };
@@ -608,9 +608,7 @@ export default function Graph() {
               <div className="graph__header__title">{nameGraph}</div>
               <div className="graph__header__data">
                 <span>Periodo: {dateGraph}</span>
-                <span>
-                  Ult Actualización: {lastDateSincro} - {lastDateSincroHour}
-                </span>
+                {/* <span>Ult Actualización: {lastDateSincro} - {lastDateSincroHour}</span>*/}
 
                 {/* <span>{activeCompany}</span> */}
                 {nameGraph !== "Día más Exitoso" &&
