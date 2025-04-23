@@ -21,7 +21,7 @@ export default function FooterGraph() {
     <footer className="menu">
       <div className="menu-item">
         <span className="link">
-          <Link href={''}>
+          <Link href={'/date'}>
             <CalendarRange />
           </Link>
         </span>

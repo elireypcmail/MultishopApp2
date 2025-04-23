@@ -134,51 +134,58 @@ const Modal = () => {
       console.log('instanciaUser no está disponible aún.')
       return
     }
-  
     setModalState({ open: true, message: 'Cargando...', status: 'loading' });
   
-    let typeCompanies = localStorage.getItem('typeCompanies')
+    const typeCompanies = localStorage.getItem('typeCompanies')
     const dateRange = JSON.parse(localStorage.getItem('dateRange'))
     const { from, to } = dateRange
-  
+
     const fromDate = new Date(from).toLocaleDateString('en-CA')
     const toDate = new Date(to).toLocaleDateString('en-CA')
-  
     const kpiSelected = localStorage.getItem('selectedGraph')
 
     try {
-      // const endpoint = category === 'Estadísticos' ? '/kpi/custom' : '/filter-data'
       const endpoint = (category === 'Estadísticos' || kpiSelected === 'flujoDeCaja') 
-      ? '/kpi/custom' 
-      : '/filter-data';
-      const response = await instance.post(endpoint, {
-        nombreCliente: instanciaUser,
-        nombreTabla: 'ventas',
-        fechaInicio: from,
-        fechaFin: to,
-        kpi: localStorage.getItem('selectedGraph'),
-        typeCompanies: typeCompanies,
-      })
-
-      const endpointDate = await instance.post(`/lastDateSincro`, {cliente : instanciaUser})
-      console.log(endpointDate.data.data)
-      localStorage.setItem('lastdateSincro', endpointDate.data.data)
-
-      if (response.data && (response.data.results || response.data.length > 0)) {
+        ? '/kpi/custom' 
+        : '/filter-data';
+  
+      // Realizar ambas solicitudes en paralelo
+      const [dataResponse, lastDateResponse] = await Promise.all([
+        instance.post(endpoint, {
+          nombreCliente: instanciaUser,
+          nombreTabla: 'ventas',
+          fechaInicio: from,
+          fechaFin: to,
+          kpi: kpiSelected,
+          typeCompanies,
+        }),
+        instance.post("/lastDateSincro", { cliente: instanciaUser })
+      ])
+  
+      // Guardar la fecha de sincronización
+      if (lastDateResponse.data?.data) {
+        localStorage.setItem('lastdateSincro', lastDateResponse.data.data)
+        console.log('Fecha de última sincronización:', lastDateResponse.data.data)
+      }
+  
+      const data = dataResponse.data
+      const resultsExist = data?.results || (Array.isArray(data) && data.length > 0)
+  
+      if (resultsExist) {
         const chartDataWithDateRange = {
-          ...response.data,
+          ...data,
           dateRange: { from, to }
         }
   
         setModalState({ open: true, message: 'Kpi encontrado', status: 'success' });
-  
         localStorage.setItem('chartData', JSON.stringify(chartDataWithDateRange))
         setChartData(chartDataWithDateRange)
         setNoDataMessage('')
         setIsDataFetched(true)
   
-        await router.push('/graph')  // Espera a que la navegación se complete
-        setModalState({ open: false, message: '', status: '' }) // Cierra el modal solo cuando haya terminado la navegación
+        router.push('/graph').then(() => {
+          setModalState({ open: false, message: '', status: '' }) // Cierra el modal después de la navegación
+        })
   
       } else {
         handleNoDataMessage(fromDate, toDate)

@@ -1,26 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import multishop from '@p/Logo Sistema Multishop Pequeno.png';
 import { useRouter } from 'next/router';
 import { setCookie } from '@g/cookies';
-import { loginUser, verifyToken } from '@api/Post';
+import { loginUser, verifyToken, versionApp } from '@api/Post';
 import { UserLogin, Identificacion, Clave, HidePassword, VisiblePassword, ReloadIcon } from '@c/Icons';
-import toast, { Toaster } from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast';
+import ModalTerms from './ModalTerms'; // Asegúrate que la ruta sea correcta
 
 export default function Login() {
   const [cliente, setCliente] = useState({ login_user: '', clave: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [modalState, setModalState] = useState({ open: false, message: '', status: '' });
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [codeVersion, setCodeVersion] = useState('');
   const { push } = useRouter();
 
-  const notifyError   = (msg) => { toast.error(msg) }
-  const notifySucces  = (msg) => { toast.success(msg) }
+  const notifyError = (msg) => toast.error(msg);
+  const notifySucces = (msg) => toast.success(msg);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCliente({ ...cliente, [name]: value.toUpperCase() });
   };
+
+  useEffect(() => {
+    const checkVersion = async () => {
+      try {
+        const res = await versionApp();
+        if (res?.data) {
+          // localStorage.setItem('version', res.data);
+          setCodeVersion(res.data);
+        } else {
+          console.error('Error: No se pudo obtener la versión de la aplicación.');
+        }
+      } catch (error) {
+        console.error('Error al verificar la versión:', error);
+      }
+    };
+  
+    checkVersion();
+  }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,13 +52,13 @@ export default function Login() {
     try {
       const res = await loginUser(cliente);
       if (res?.tokenCode) {
-        const tokenRes = await verifyToken(res.tokenCode)
+        const tokenRes = await verifyToken(res.tokenCode);
         if (tokenRes.message === 'Suscripción activa') {
           setCookie('instancia', res.identificacion);
           localStorage.setItem('defaultGraphType', res.type_graph);
           localStorage.setItem('typeCompanies', res.type_comp);
           setModalState({ open: true, message: '¡Haz iniciado sesión!', status: 'success' });
-          notifySucces('Haz iniciado sesión!')
+          notifySucces('Haz iniciado sesión!');
           
           setTimeout(() => {
             push('/date').then(() => {
@@ -46,15 +68,15 @@ export default function Login() {
           }, 500);
         } else if (tokenRes.message === 'El token ha expirado') {
           setModalState({ open: true, message: 'Su suscripción ha vencido. Por favor realice la renovación. Contáctenos', status: 'error' });
-          notifyError('Su suscripción ha vencido. Por favor realice la renovación. Contáctenos')
+          notifyError('Su suscripción ha vencido. Por favor realice la renovación. Contáctenos');
         } else if (tokenRes.message.startsWith('Faltan ') || tokenRes.message.startsWith('Su suscripción ')) {
-          setModalState({ open: true, message: tokenRes.message , status: 'error' });
+          setModalState({ open: true, message: tokenRes.message, status: 'error' });
 
           setCookie('instancia', res.identificacion);
           localStorage.setItem('defaultGraphType', res.type_graph);
           localStorage.setItem('typeCompanies', res.type_comp);
-          notifySucces(tokenRes.message)
-          
+          notifySucces(tokenRes.message);
+
           setTimeout(() => {
             push('/date').then(() => {
               setModalState({ open: false, message: '', status: '' });
@@ -65,7 +87,7 @@ export default function Login() {
       }
     } catch (error) {
       setModalState({ open: true, message: error?.response?.data?.message || 'Error en la solicitud.', status: 'error' });
-      notifyError(error?.response?.data?.message)
+      notifyError(error?.response?.data?.message);
       console.error('Error en la solicitud:', error);
       setTimeout(() => {
         setModalState({ open: false, message: '', status: '' });
@@ -118,6 +140,11 @@ export default function Login() {
                   Iniciar Sesión
                 </button>
               </div>
+              <div className='terms_conditions'>
+                <a onClick={() => setShowTermsModal(true)}>
+                  Términos y Condiciones
+                </a>
+              </div>
             </form>
           </div>
         </div>
@@ -127,9 +154,17 @@ export default function Login() {
             <ReloadIcon className="icon-loading" />
           </div>
         )}
-        
+
+        {/* Mostrar ModalTerms si openTerms es true */}
+        {showTermsModal && (
+          <ModalTerms onClose={() => setShowTermsModal(false)} />
+        )}
+
         <div className="logo">
           <Image className="img" src={multishop} alt="logo multishop" priority />
+        </div>
+        <div className='terms_conditions'>
+          <a>Version {codeVersion}</a>
         </div>
       </div>
     </div>

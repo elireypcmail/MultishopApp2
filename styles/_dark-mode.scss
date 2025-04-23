@@ -11,6 +11,18 @@
           -3px -3px 11px #ffffff35;
       }
 
+      .content-terms{
+        background-color: rgb(75, 75, 75);
+      }
+
+      .content-terms h1 {
+        color: #fff;
+      }
+
+      .content-terms-text {
+        color: #fff;
+      }
+
       .mood-btn {
         background: #24212181;
 
@@ -185,5 +197,6 @@
       backdrop-filter: blur(5px);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.557);
     }
+
   }
 }
