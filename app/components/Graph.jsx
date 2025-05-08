@@ -101,25 +101,24 @@ export default function Graph() {
     const date = JSON.parse(localStorage.getItem("dateRange"));
     const lastdateSincronizate = localStorage.getItem("lastdateSincro")
 
-    // console.log(lastdateSincronizate)
-
     if (date) {
-      const lastest = new Date(lastdateSincronizate)
-      const hour = new Date(lastdateSincronizate)
+      const lastest = new Date(lastdateSincronizate);
 
-      console.log("hour", hour)
+      const dateAct = lastest.toISOString().slice(0, 10); // "2025-04-23"
+      const time = lastest.toLocaleTimeString('es-VE', {
+        timeZone: 'America/Caracas', // Zona horaria fija
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+      });
+      
+
+      const formatted = `${dateAct} ${time.toLowerCase()}`;
+      console.log(formatted);
+
 
       const from = new Date(date.from);
       const to = new Date(date.to);
-      const lastedFormated = lastest.toLocaleDateString("en-CA")
-      const hourFormated = hour.toLocaleTimeString("en-CA", {
-        timeZone: "UTC",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })
-
-      console.log(hourFormated)
 
       const fromFormatted = from.toLocaleDateString("en-CA");
       const toFormatted = to.toLocaleDateString("en-CA");
@@ -138,7 +137,7 @@ export default function Graph() {
 
       setNameGraph(res);
       setDateGraph(`${fromFormatted} / ${toFormatted}`);
-      setLastDateSincro(lastdateSincronizate)
+      setLastDateSincro(formatted)
       // setLastDateSincroHour(hourFormated)
       setTypeRange(typeRange);
     }
@@ -523,23 +522,30 @@ export default function Graph() {
                                 {/* Usar la fecha en formato 'YYYY-MM-DD' */}
                               </p>
                             );
-                          } else if (
+                          }else if (
                             typeof fieldValue === "string" ||
                             typeof fieldValue === "number"
                           ) {
-                            // const formattedValue = !isNaN(parseFloat(fieldValue))
-                            // ? new Intl.NumberFormat("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(parseFloat(fieldValue))
-                            // : fieldValue;
-                        
                             const formatNumber = (value) => {
                               if (isNaN(value) || value === "" || value === null) return value;
-                            
+                          
                               const number = parseFloat(value).toFixed(2); // Asegura dos decimales
-                              return number.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/(\d+)\.(\d{2})$/, "$1,$2");
+                              return number
+                                .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                                .replace(/(\d+)\.(\d{2})$/, "$1,$2");
                             };
-                            
-                            const formattedValue = formatNumber(fieldValue);
 
+                            const codeFields = [
+                              "cod_art_bs",
+                              "cod_op_bs",
+                              "cod_clibs",
+                              "cod_fab_bs"
+                            ];
+                          
+                            const formattedValue = codeFields.includes(fieldKey)
+                            ? String(fieldValue) // Tratar como string sin formatear
+                            : formatNumber(fieldValue); // Solo formatear si no es código
+                          
                             return (
                               <p
                                 key={fieldKey}

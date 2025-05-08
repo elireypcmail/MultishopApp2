@@ -29,14 +29,15 @@ export const verifyToken = async (token) => {
   }
 }
 
-export const versionApp = async () => {
+export const getParametros = async () => {
   try {
-    const response = await instance.get('/version')
+    const response = await instance.get('/parametros')
     // console.log(response);
     // console.log(response.status);
     // console.log(response.data)    
     return response.data
   } catch (error) {
+    console.log(error)
     console.error('Error en la solicitud de login:', error)
     throw error
   }

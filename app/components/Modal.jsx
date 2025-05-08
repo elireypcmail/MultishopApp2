@@ -199,7 +199,7 @@ const Modal = () => {
       router.push('/graph')
     }
   }
-  
+
   // Función auxiliar para manejar el mensaje de "No hay datos"
   const handleNoDataMessage = (fromDate, toDate) => {
     const message = `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`
