@@ -104,7 +104,12 @@ export default function Graph() {
     if (date) {
       const lastest = new Date(lastdateSincronizate);
 
-      const dateAct = lastest.toISOString().slice(0, 10); // "2025-04-23"
+      console.log(lastest)
+
+      // const dateAct = lastest.toISOString().slice(0, 10); // "2025-04-23"
+      const dateAct = lastest.toLocaleDateString('en-CA', {
+        timeZone: 'America/Caracas'
+      })      
       const time = lastest.toLocaleTimeString('es-VE', {
         timeZone: 'America/Caracas', // Zona horaria fija
         hour: 'numeric',
