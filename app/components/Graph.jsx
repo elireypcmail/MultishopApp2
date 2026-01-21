@@ -20,7 +20,7 @@ import {
   Inventory,
   Boxes,
   Employee,
-  Earnings
+  Earnings,
 } from "./Icons";
 
 export default function Graph() {
@@ -40,6 +40,13 @@ export default function Graph() {
   const [typeCompanies, setTypeCompanies] = useState("");
   const [lastDateSincro, setLastDateSincro] = useState("");
   const [lastDateSincroHour, setLastDateSincroHour] = useState("");
+  const [showGraphTypeModal, setShowGraphTypeModal] = useState(false);
+  const [criterio, setCriterio] = useState("monto"); // valor por defecto
+
+  useEffect(() => {
+    const savedCriterio = localStorage.getItem("criterio");
+    if (savedCriterio) setCriterio(savedCriterio);
+  }, []);
 
   useEffect(() => {
     const savedDarkMode = localStorage.getItem("darkMode") === "true";
@@ -60,7 +67,7 @@ export default function Graph() {
 
   useEffect(() => {
     loadName();
-    loadChartData();    
+    loadChartData();
   }, []);
 
   const loadChartData = () => {
@@ -99,28 +106,26 @@ export default function Graph() {
   const loadName = () => {
     let res = localStorage.getItem("selectedGraphName");
     const date = JSON.parse(localStorage.getItem("dateRange"));
-    const lastdateSincronizate = localStorage.getItem("lastdateSincro")
+    const lastdateSincronizate = localStorage.getItem("lastdateSincro");
 
     if (date) {
       const lastest = new Date(lastdateSincronizate);
 
-      console.log(lastest)
+      console.log(lastest);
 
       // const dateAct = lastest.toISOString().slice(0, 10); // "2025-04-23"
-      const dateAct = lastest.toLocaleDateString('en-CA', {
-        timeZone: 'America/Caracas'
-      })      
-      const time = lastest.toLocaleTimeString('es-VE', {
-        timeZone: 'America/Caracas', // Zona horaria fija
-        hour: 'numeric',
-        minute: '2-digit',
+      const dateAct = lastest.toLocaleDateString("en-CA", {
+        timeZone: "America/Caracas",
+      });
+      const time = lastest.toLocaleTimeString("es-VE", {
+        timeZone: "America/Caracas", // Zona horaria fija
+        hour: "numeric",
+        minute: "2-digit",
         hour12: true,
       });
-      
 
       const formatted = `${dateAct} ${time.toLowerCase()}`;
       console.log(formatted);
-
 
       const from = new Date(date.from);
       const to = new Date(date.to);
@@ -142,7 +147,7 @@ export default function Graph() {
 
       setNameGraph(res);
       setDateGraph(`${fromFormatted} / ${toFormatted}`);
-      setLastDateSincro(formatted)
+      setLastDateSincro(formatted);
       // setLastDateSincroHour(hourFormated)
       setTypeRange(typeRange);
     }
@@ -170,10 +175,9 @@ export default function Graph() {
 
     let selectedGraph = localStorage.getItem("selectedGraph");
 
-    console.log(selectedGraph)
+    console.log(selectedGraph);
 
     if (selectedGraph === "flujoDeCaja") return renderStatisticalData();
-
 
     let typeCompanies = localStorage.getItem("typeCompanies");
 
@@ -225,36 +229,96 @@ export default function Graph() {
   };
 
   const renderStatisticalData = () => {
-    console.log("Statistical Data:", chartDataState);
-
     if (!chartDataState || Object.keys(chartDataState).length === 0) {
       return <div>No hay datos estadísticos disponibles.</div>;
     }
 
     const typeCompanies = localStorage.getItem("typeCompanies");
     const dataEntries = Object.entries(chartDataState).filter(
-      ([key]) => key !== "dateRange"
+      ([key]) => key !== "dateRange",
     );
-
-    // Extraer nombres únicos de empresas
     const uniqueCompanies = [
       ...new Set(dataEntries.flatMap(([, values]) => values.nomemp)),
     ];
-
-    // Si no se ha seleccionado ninguna empresa, se usa la primera empresa disponible
     const activeCompany = confirmedCompany || uniqueCompanies[0];
 
-    const handleSelectCompany = (company) => {
-      setSelectedCompany(company);
-    };
-
+    const handleSelectCompany = (company) => setSelectedCompany(company);
     const handleSaveSelection = () => {
       setConfirmedCompany(selectedCompany);
       setModalVisible(false);
       console.log("Empresa confirmada:", selectedCompany);
     };
 
+    const getKPIValue = (value) => {
+      const parse = (v) => {
+        if (v === null || v === undefined) return 0;
+        if (typeof v === "number") return v;
+        return (
+          parseFloat(v.toString().replace(/\./g, "").replace(/,/g, ".")) || 0
+        );
+      };
+
+      // KPIs donde se permite mostrar Total Unidades
+      const showTotalUnidadesKPIs = [
+        "Productos más vendidos USD",
+        "Productos más vendidos UND",
+        "Laboratorio con más Ventas USD",
+        "Laboratorio con más Ventas UND",
+      ];
+
+      if (criterio === "unidades") {
+        return {
+          main: parse(value.unidades_vendidas ?? value.total_unidades ?? 0),
+          secondary: parse(value.total_ventas ?? 0),
+        };
+      }
+
+      // Si no es KPI de productos/laboratorios, no devolver total_unidades
+      const secondaryValue = showTotalUnidadesKPIs.includes(nameGraph)
+        ? parse(value.total_unidades ?? value.unidades_vendidas ?? 0)
+        : 0;
+
+      return {
+        main: parse(value.total_ventas ?? 0),
+        secondary: secondaryValue,
+      };
+    };
+
+    const isTopDay =
+      nameGraph.includes("Día más Exitoso") ||
+      nameGraph.includes("Valores de Inventario");
+
+    const hideDateForKPI = [
+      "Productos más vendidos",
+      "Fabricantes con más Ventas",
+      "Cajeros con más Venta",
+      "Flujo de Caja",
+    ];
+
+    const hideUnidadesForKPI = [
+      "Día más Exitoso",
+      "Venta más Exitosa",
+      "Cajeros con más Venta",
+      "Valores de Inventario",
+    ];
+
+    const hideNomempForKPI = [
+      "Productos más vendidos",
+      "Fabricantes con más Ventas",
+      "Cajeros con más Venta",
+      "Valores de Inventario",
+      "Cajeros con más venta",
+      "Flujo de Caja",
+    ];
+
+    const hideCompanySelectorForKPI = ["Día más Exitoso", "Venta más Exitosa"];
+
     const getFieldName = (key) => {
+      // if (criterio === "unidades") {
+      //   if (key === "total_ventas") return "Total Unidades";
+      //   if (key === "total_unidades" || key === "unidades_vendidas") return "Total Ventas";
+      // }
+
       const fieldNames = {
         nom_op_bs: "Nombre",
         cod_op_bs: "Código",
@@ -268,6 +332,7 @@ export default function Graph() {
         unidades_vendidas: "Unidades Vendidas",
         fecha: "Fecha",
         total_ventas: "Total Ventas",
+        total_unidades: "Total Unidades",
         cantidad_und_inv: "Cantidad de Unidades",
         total_usdca_inv: "Valor Inventario USD CA",
         total_usdcp_inv: "Valor Inventario USD CP",
@@ -281,34 +346,161 @@ export default function Graph() {
         totcop: "Total Pesos",
         totbs: "Total Bs",
       };
+
       return fieldNames[key] || key;
     };
 
-    const isTopDay =
-      nameGraph.includes("Día más Exitoso") ||
-      nameGraph.includes("Valores de Inventario");
+    const renderField = (fieldKey, fieldValue, value) => {
+      const parseNumber = (v) => {
+        if (v === null || v === undefined) return 0;
+        if (typeof v === "number") return v;
+        const cleaned = v.toString().replace(/\./g, "").replace(/,/g, ".");
+        const n = parseFloat(cleaned);
+        return isNaN(n) ? 0 : n;
+      };
 
-    // Lista de KPIs para los cuales NO mostrar la fecha
-    const hideDateForKPI = [
-      "Productos más vendidos",
-      "Fabricantes con más Ventas",
-      "Cajeros con más Venta",
-      "Flujo de Caja"
-    ];
+      // Campos a ignorar siempre
+      if (["id", "codemp"].includes(fieldKey)) return null;
+      if (
+        fieldKey === "total_unidades" &&
+        hideUnidadesForKPI.includes(nameGraph)
+      )
+        return null;
+      if (fieldKey === "fecha" && hideDateForKPI.includes(nameGraph))
+        return null;
+      if (fieldKey === "nomemp" && hideNomempForKPI.includes(nameGraph))
+        return null;
+      if (
+        fieldKey === "nomemp" &&
+        typeCompanies !== "Multiple" &&
+        hideCompanySelectorForKPI.includes(nameGraph)
+      )
+        return null;
 
-    const hideNomempForKPI = [
-      "Productos más vendidos",
-      "Fabricantes con más Ventas",
-      "Cajeros con más Venta",
-      "Valores de Inventario",
-      "Cajeros con más venta",
-      "Flujo de Caja"
-    ];
+      // Fecha
+      if (fieldKey === "fecha") {
+        const date = new Date(fieldValue);
+        const isoDate = date.toISOString().split("T")[0];
+        return (
+          <p
+            key={fieldKey}
+            className="text-sm text-gray-500 truncate dark:text-gray-400"
+          >
+            Fecha: {isoDate}
+          </p>
+        );
+      }
 
-    const hideCompanySelectorForKPI = ["Día más Exitoso", "Venta más Exitosa"];
+      // Evitar repetir valores principales
+      if (criterio === "monto" && fieldKey === "total_ventas") return null;
+      if (
+        criterio === "unidades" &&
+        (fieldKey === "total_unidades" || fieldKey === "unidades_vendidas")
+      )
+        return null;
+
+      // Mostrar Total Ventas solo si no es KPI principal
+      if (fieldKey === "total_ventas") {
+        return (
+          <p
+            key={fieldKey}
+            className="text-sm text-gray-500 truncate dark:text-gray-400"
+          >
+            Total Ventas: $
+            {parseNumber(fieldValue).toLocaleString("es-ES", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        );
+      }
+
+      // Mostrar Total Unidades solo si no es KPI principal
+      if (fieldKey === "total_unidades" || fieldKey === "unidades_vendidas") {
+        return (
+          <p
+            key={fieldKey}
+            className="text-sm text-gray-500 truncate dark:text-gray-400"
+          >
+            Total Unidades: {parseNumber(fieldValue).toLocaleString("es-ES")}
+          </p>
+        );
+      }
+
+      // Otros campos (producto, empresa, cliente, etc.)
+      if (typeof fieldValue === "string" || typeof fieldValue === "number") {
+        const formatNumber = (v) => {
+          if (isNaN(v) || v === "" || v === null) return v;
+          const number = parseFloat(v).toFixed(2);
+          return number
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+            .replace(/(\d+)\.(\d{2})$/, "$1,$2");
+        };
+
+        const codeFields = [
+          "cod_art_bs",
+          "cod_op_bs",
+          "cod_clibs",
+          "cod_fab_bs",
+        ];
+        const formattedValue = codeFields.includes(fieldKey)
+          ? String(fieldValue)
+          : formatNumber(fieldValue);
+
+        return (
+          <p
+            key={fieldKey}
+            className="text-sm text-gray-500 truncate dark:text-gray-400"
+          >
+            {getFieldName(fieldKey)}: {formattedValue}
+          </p>
+        );
+      }
+
+      return null;
+    };
+
+    const sortCriteriaMap = {
+      "Productos más vendidos": "unidades_vendidas",
+      "Fabricantes con más Ventas": "total_ventas",
+      "Cajeros con más Venta": "numero_operaciones",
+      "Día más Exitoso": "total_ventas",
+      "Venta más Exitosa": "total_ventas",
+      "Flujo de Caja": "total_ventas",
+    };
+
+    const sortKey =
+      (nameGraph.includes("Productos más vendidos") ||
+      nameGraph.includes("Laboratorio con más Ventas")) &&
+      criterio === "unidades"
+        ? "unidades_vendidas"
+        : sortCriteriaMap[nameGraph] || "total_ventas";
+
+    const parseNumber = (value) => {
+      if (value === null || value === undefined) return 0;
+      if (typeof value === "number") return value;
+      if (typeof value === "string") {
+        const cleaned = value.replace(/\./g, "").replace(/,/g, ".").replace(/\s*UND/i, "");
+        const n = parseFloat(cleaned);
+        return isNaN(n) ? 0 : n;
+      }
+      return 0;
+    };
+
+
+    const filteredEntries = dataEntries.filter(([, value]) =>
+      hideCompanySelectorForKPI.includes(nameGraph)
+        ? true
+        : value.nomemp === activeCompany,
+    );
+
+    const sortedEntriesByKPI = filteredEntries.sort(
+      ([, a], [, b]) => parseNumber(b[sortKey]) - parseNumber(a[sortKey]),
+    );
 
     return (
       <div className="statistical-data w-full max-w-md p-6">
+        {/* Mostrar iconos y empresa seleccionada */}
         {typeCompanies === "Multiple" &&
           !hideCompanySelectorForKPI.includes(nameGraph) && (
             <div>
@@ -320,81 +512,73 @@ export default function Graph() {
               </button>
             </div>
           )}
+
         {activeCompany && !hideCompanySelectorForKPI.includes(nameGraph) && (
           <div
             style={{
               textAlign: "center",
               fontSize: "17px",
               fontWeight: 500,
-              marginTop: "10px",
-              marginBottom: "10px",
+              marginTop: 10,
+              marginBottom: 10,
             }}
           >
             {activeCompany}
           </div>
         )}
-        {typeCompanies !== "Multiple" && activeCompany && hideCompanySelectorForKPI.includes(nameGraph) && (
-          <div
-            style={{
-              textAlign: "center",
-              fontSize: "17px",
-              fontWeight: 500,
-              marginTop: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            {activeCompany}
-          </div>
-        )}
-        {nameGraph == "Día más Exitoso" && (
+
+        {nameGraph === "Día más Exitoso" && (
           <div className="found-winner">
-            <div>
-              <Winner />
-            </div>
+            <Winner />
           </div>
         )}
-        {nameGraph == "Venta más Exitosa" && (
+        {nameGraph === "Venta más Exitosa" && (
           <div className="found-winner">
-            <div>
-              <WinnerSale />
-            </div>
+            <WinnerSale />
           </div>
         )}
-        {nameGraph == "Fabricantes con más Ventas" && (
+        {nameGraph === "Fabricantes con más Ventas" && (
           <div className="found-winner">
-            <div>
-              <FactoryLogo />
-            </div>
+            <FactoryLogo />
           </div>
         )}
-        {nameGraph == "Cajeros con más Venta" && (
+        {nameGraph === "Cajeros con más Venta" && (
           <div className="found-winner">
-            <div>
-              <Employee />
-            </div>
+            <Employee />
           </div>
         )}
-        {nameGraph == "Productos más vendidos" && (
+        {nameGraph === "Productos más vendidos USD" && (
           <div className="found-winner">
-            <div>
-              <Boxes />
-            </div>
+            <Boxes />
           </div>
         )}
-        {nameGraph == "Valores de Inventario" && (
+        {nameGraph === "Productos más vendidos UND" && (
           <div className="found-winner">
-            <div>
-              <Inventory />
-            </div>
+            <Boxes />
           </div>
         )}
-        {nameGraph == "Flujo de Caja" && (
+        {nameGraph === "Laboratorio con más Ventas USD" && (
           <div className="found-winner">
-            <div>
-              <Earnings />
-            </div>
+            <FactoryLogo />
           </div>
         )}
+        {nameGraph === "Laboratorio con más Ventas UND" && (
+          <div className="found-winner">
+            <FactoryLogo />
+          </div>
+        )}
+        {nameGraph === "Valores de Inventario" && (
+          <div className="found-winner">
+            <Inventory />
+          </div>
+        )}
+        {nameGraph === "Flujo de Caja" && (
+          <div className="found-winner">
+            <Earnings />
+          </div>
+        )}
+
+        {/* Modal de selección */}
         {modalVisible && (
           <div className="modal-type" style={{ backgroundColor: "#00000042" }}>
             <div className="modal-content-type">
@@ -405,16 +589,11 @@ export default function Graph() {
                 <CloseModal />
               </span>
               <h2 className="ti-graph">Seleccionar Empresa</h2>
-              <ul
-                className="flex flex-col text-center list-none gap-[20px]"
-                style={{ gap: "10px" }}
-              >
+              <ul className="flex flex-col text-center list-none gap-[20px]">
                 {uniqueCompanies.map((company) => (
                   <li
                     key={company}
-                    className={`separate ${
-                      selectedCompany === company ? "selected" : ""
-                    }`}
+                    className={`separate ${selectedCompany === company ? "selected" : ""}`}
                   >
                     <button onClick={() => handleSelectCompany(company)}>
                       {company}
@@ -429,8 +608,6 @@ export default function Graph() {
                     backgroundColor: "#4487B2",
                     borderRadius: "10px",
                     marginBottom: "10px",
-                    textAlign: "center",
-                    borderRadius: "10px",
                     color: "white",
                     fontFamily: "title",
                     fontSize: "18px",
@@ -446,137 +623,47 @@ export default function Graph() {
           </div>
         )}
 
+        {/* Lista de datos estadísticos */}
         <div className="flow-root">
-          {/* {activeCompany && <p>{activeCompany}</p>} */}
           <ul role="list" className="divide-y">
-            {dataEntries
-              .filter(([, value]) => {
-                // Mostrar todas las empresas si el KPI es "Día más Exitoso" o "Venta más Exitosa"
+            {sortedEntriesByKPI.map(([key, value]) => {
+              const sortedFields = Object.entries(value).sort(([a], [b]) => {
                 if (hideCompanySelectorForKPI.includes(nameGraph)) {
-                  return true;
+                  if (a === "nomemp") return -1;
+                  if (b === "nomemp") return 1;
                 }
-                return value.nomemp === activeCompany;
-              })
-              .sort(([, valueA], [, valueB]) => {
-                // Si estamos mostrando todas las empresas, ordenar por 'total_ventas' de mayor a menor
-                if (hideCompanySelectorForKPI.includes(nameGraph)) {
-                  return valueB.total_ventas - valueA.total_ventas; // Orden descendente por total_ventas
+                if (isTopDay) {
+                  if (a === "fecha") return -1;
+                  if (b === "fecha") return 1;
                 }
-                return 0; // Si no, no ordenar (deja el orden original)
-              })
-              .map(([key, value]) => {
-                const sortedEntries = Object.entries(value).sort(
-                  ([fieldKeyA], [fieldKeyB]) => {
-                    if (hideCompanySelectorForKPI.includes(nameGraph)) {
-                      if (fieldKeyA === "nomemp") return -1; // Priorizar "nomemp"
-                      if (fieldKeyB === "nomemp") return 1;
-                    }
-                    if (isTopDay) {
-                      if (fieldKeyA === "fecha") return -1; // Priorizar 'fecha'
-                      if (fieldKeyB === "fecha") return 1;
-                    }
-                    return 0; // Mantener el orden original en otros casos
-                  }
-                );
+                return 0;
+              });
 
-                return (
-                  <li key={key} className="statistical-item py-10 sm:py-10">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0 ms-4">
-                        {sortedEntries.map(([fieldKey, fieldValue]) => {
-                          if (
-                            fieldKey === "id" ||
-                            fieldKey === "total_ventas" ||
-                            fieldKey === "codemp"
-                          )
-                            return null;
+              const { main } = getKPIValue(value);
 
-                          // Ocultar valores en algunos KPI
-                          if (
-                            fieldKey === "fecha" &&
-                            hideDateForKPI.includes(nameGraph)
-                          )
-                            return null;
-                          if (
-                            fieldKey === "nomemp" &&
-                            hideNomempForKPI.includes(nameGraph)
-                          )
-                            return null;
-                          if (
-                            fieldKey === "nomemp" &&
-                            typeCompanies !== "Multiple" &&
-                            hideCompanySelectorForKPI.includes(nameGraph)
-                          ) {
-                            return null;
-                          }
-                            
-                          if (fieldKey === "fecha") {
-                            // Convertir la fecha a un objeto Date
-                            const date = new Date(fieldValue);
-
-                            // Asegurarse de que la fecha esté en formato 'YYYY-MM-DD'
-                            const isoDate = date.toISOString().split("T")[0]; // Esto te dará 'YYYY-MM-DD'
-                            console.log(isoDate);
-
-                            return (
-                              <p
-                                key={fieldKey}
-                                className="text-sm text-gray-500 truncate dark:text-gray-400"
-                              >
-                                {getFieldName(fieldKey)}: {isoDate}{" "}
-                                {/* Usar la fecha en formato 'YYYY-MM-DD' */}
-                              </p>
-                            );
-                          }else if (
-                            typeof fieldValue === "string" ||
-                            typeof fieldValue === "number"
-                          ) {
-                            const formatNumber = (value) => {
-                              if (isNaN(value) || value === "" || value === null) return value;
-                          
-                              const number = parseFloat(value).toFixed(2); // Asegura dos decimales
-                              return number
-                                .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                                .replace(/(\d+)\.(\d{2})$/, "$1,$2");
-                            };
-
-                            const codeFields = [
-                              "cod_art_bs",
-                              "cod_op_bs",
-                              "cod_clibs",
-                              "cod_fab_bs"
-                            ];
-                          
-                            const formattedValue = codeFields.includes(fieldKey)
-                            ? String(fieldValue) // Tratar como string sin formatear
-                            : formatNumber(fieldValue); // Solo formatear si no es código
-                          
-                            return (
-                              <p
-                                key={fieldKey}
-                                className="text-sm text-gray-500 truncate dark:text-gray-400"
-                              >
-                                {getFieldName(fieldKey)}: {formattedValue}
-                              </p>
-                            );
-                          }
-                        })}
-                      </div>
-                      {nameGraph !== "Valores de Inventario" && nameGraph !== "Flujo de Caja" && (
-                        <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
-                          {`$${parseFloat(value.total_ventas).toLocaleString(
-                            "es-ES",
-                            {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            }
-                          )}`}
-                        </div>
+              return (
+                <li key={key} className="statistical-item py-10 sm:py-10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0 ms-4">
+                      {sortedFields.map(([fieldKey, fieldValue]) =>
+                        renderField(fieldKey, fieldValue, value),
                       )}
                     </div>
-                  </li>
-                );
-              })}
+                    {nameGraph !== "Valores de Inventario" &&
+                      nameGraph !== "Flujo de Caja" && (
+                        <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                          {criterio === "unidades"
+                            ? `${main.toLocaleString("es-ES")} UND`
+                            : `$${main.toLocaleString("es-ES", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}`}
+                        </div>
+                      )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
@@ -588,25 +675,21 @@ export default function Graph() {
     router.push("/listkpi");
   };
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleOpenGraphTypeModal = () => {
+    setShowGraphTypeModal(true);
   };
 
   const handleSaveGraphType = (newGraphType) => {
     setCurrentGraphType(newGraphType);
     localStorage.setItem("selectedGraphType", newGraphType);
-    setIsModalOpen(false);
+    setShowGraphTypeModal(false);
   };
 
   return (
     <div className="body">
       <div className="calendar gra-content">
         <div className="graph-option">
-          <div className="graph-type" onClick={handleOpenModal}>
+          <div className="graph-type" onClick={handleOpenGraphTypeModal}>
             <Options />
           </div>
           <div className="mood">
@@ -659,9 +742,10 @@ export default function Graph() {
         <FooterGraph />
       </div>
 
-      {isModalOpen && category !== "Estadísticos" && (
+      {/* Modal de tipos de gráfico */}
+      {showGraphTypeModal && category !== "Estadísticos" && (
         <GraphTypeModal
-          onClose={handleCloseModal}
+          onClose={() => setShowGraphTypeModal(false)}
           onSave={handleSaveGraphType}
           selectedGraphName={nameGraph}
         />

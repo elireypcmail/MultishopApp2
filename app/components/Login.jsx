@@ -58,6 +58,7 @@ export default function Login() {
           setCookie('instancia', res.identificacion)
           localStorage.setItem('defaultGraphType', res.type_graph)
           localStorage.setItem('typeCompanies', res.type_comp)
+          localStorage.setItem('idUser', res.userId)
           
           const now = new Date()
           localStorage.setItem('loginTime', now.toISOString())
