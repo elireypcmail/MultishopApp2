@@ -70,7 +70,7 @@
       }
     }
 
-    .button__graph{
+    .button__graph {
       display: flex;
       flex-direction: row;
       position: absolute;
@@ -78,7 +78,7 @@
       height: 40px;
       top: 83%;
 
-      .btn{
+      .btn {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -92,7 +92,7 @@
         border-radius: 10px;
       }
 
-      span{
+      span {
         margin-left: 5px;
         margin-top: 1px;
       }
@@ -101,13 +101,10 @@
 
   .footer2-ca {
     position: absolute;
-    bottom: 10px;
-    right: -199px;
+    bottom: 10vh;
     width: 100%;
     align-items: center;
     padding: 0 20px;
-    position: absolute;
-    bottom: 10vh;
 
     .logo-small {
       margin-top: 15px;
@@ -136,7 +133,6 @@
     height: 100%;
     display: flex;
     justify-content: center;
-    margin-top: 1.5rem;
 
     .modal-content {
       width: 94%;
@@ -200,47 +196,23 @@
   }
 
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
+    from { opacity: 1; }
+    to { opacity: 0; }
   }
 
   @keyframes fadeInContent {
-    from {
-      opacity: 0;
-      transform: scale(0.8);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   @keyframes fadeOutContent {
-    from {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    to {
-      opacity: 0;
-      transform: scale(0.8);
-    }
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.8); }
   }
 
   .save-button-container {
@@ -251,18 +223,18 @@
     bottom: 20px;
     right: 20px;
 
-    .back{
+    .back {
       width: 37%;
       display: flex;
       flex-direction: row;
       justify-content: center;
-      align-items: center;
+      align-items: center;
 
-      .btn{
+      .btn {
         display: flex;
         align-items: center;
 
-        span{ margin-left: 4px; }
+        span { margin-left: 4px; }
       }
     }
   }

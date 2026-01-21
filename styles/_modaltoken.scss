@@ -1,0 +1,131 @@
+// ==============================
+// Variables
+// ==============================
+$overlay-bg: rgba(0, 0, 0, 0.6);
+$modal-bg: #ffffff;
+$primary: #0f766e;
+$gray-light: #e5e7eb;
+$gray-text: #6b7280;
+
+// ==============================
+// Overlay
+// ==============================
+.token-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: $overlay-bg;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+// ==============================
+// Modal
+// ==============================
+.token-modal {
+  background: $modal-bg;
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  text-align: center;
+  width: 320px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+
+  // Código
+  .token-code {
+    font-size: 2.2rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-bottom: 1.2rem;
+  }
+
+  // ==============================
+  // Progress
+  // ==============================
+  // .progress-container {
+  //   position: relative;
+  //   width: 120px;
+  //   height: 120px;
+  //   margin: 0 auto 1rem;
+
+  //   .progress-ring {
+  //     transform: rotate(-90deg);
+
+  //     &-bg {
+  //       fill: none;
+  //       stroke: $gray-light;
+  //       stroke-width: 8;
+  //     }
+
+  //     &-fill {
+  //       fill: none;
+  //       stroke: $primary;
+  //       stroke-width: 8;
+  //       stroke-linecap: round;
+  //       transition: stroke-dashoffset 1s linear;
+  //     }
+  //   }
+
+  //   .progress-text {
+  //     position: absolute;
+  //     inset: 0;
+  //     display: flex;
+  //     align-items: center;
+  //     justify-content: center;
+  //     font-size: 1.4rem;
+  //     font-weight: 500;
+  //     color: $primary;
+  //   }
+  // }
+
+// Variables (asegurate de tenerlas definidas)
+$overlay-bg: rgba(0, 0, 0, 0.6);
+$modal-bg: #ffffff;
+$primary: #0f766e;
+$gray-light: #e5e7eb;
+
+// ... (El resto de tu SCSS para overlay y modal se mantiene igual) ...
+
+// ==============================
+// Progress Container
+// ==============================
+.progress-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 1rem;
+  // background-color: #ffffff; // Opcional
+
+  // Círculo de fondo (gris/azul claro)
+  .progress-bg {
+    stroke: $gray-light; // o #0f766e si quieres el borde fijo de color
+  }
+
+  // Círculo de progreso (el que se mueve)
+  .progress {
+    stroke: $primary; // Color de la barra que se mueve
+    // transition: SE CONTROLA EN REACT AHORA
+  }
+
+  // Texto en el centro
+  .progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); // Centrado perfecto
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: $primary;
+    margin: 0; // Reset
+  }
+}
+
+// ... Resto de botones e info ...
+
+
+  // Info
+  .token-info {
+    font-size: 0.75rem;
+    color: $gray-text;
+  }
+}
