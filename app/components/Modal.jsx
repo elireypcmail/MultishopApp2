@@ -2,11 +2,11 @@ import { useRouter } from "next/router";
 import multishop from "@p/Logo Sistema Multishop Pequeno.png";
 import Image from "next/image";
 import FooterGraph from "./Footer";
-import instance from "@g/api";
 import { defaultChartTypes } from "@conf/defaultChartTypes";
 import { getCookie } from "@a/globals/cookies";
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, Sun, Moon, ReloadIcon } from "./Icons";
+import { useKpiDataMutation } from "@g/useKpiDataMutation";
 
 const Modal = () => {
   const router = useRouter();
@@ -114,38 +114,38 @@ const Modal = () => {
           { name: "Clientes Nuevos", value: "clientesn" },
           { name: "Flujo de Caja", value: "flujoDeCaja" },
         ];
-case "Estadísticos":
-  return [
-    { name: "Día más Exitoso", value: "DiaMasExitoso" },
-    { name: "Venta más Exitosa", value: "VentaMasExitosa" },
-    { name: "Cajeros con más Venta", value: "CajerosConMasVentas" },
+      case "Estadísticos":
+        return [
+          { name: "Día más Exitoso", value: "DiaMasExitoso" },
+          { name: "Venta más Exitosa", value: "VentaMasExitosa" },
+          { name: "Cajeros con más Venta", value: "CajerosConMasVentas" },
 
-    // 🔹 Productos TOP
-    {
-      name: "Productos más vendidos USD",
-      value: "ProductosTOP",
-      criterio: "monto",
-    },
-    {
-      name: "Productos más vendidos UND",
-      value: "ProductosTOP",
-      criterio: "unidades",
-    },
+          // 🔹 Productos TOP
+          {
+            name: "Productos más vendidos USD",
+            value: "ProductosTOP",
+            criterio: "monto",
+          },
+          {
+            name: "Productos más vendidos UND",
+            value: "ProductosTOP",
+            criterio: "unidades",
+          },
 
-    // 🔹 Laboratorios
-    {
-      name: "Laboratorio con más Ventas USD",
-      value: "LaboratorioConMasVentas",
-      criterio: "monto",
-    },
-    {
-      name: "Laboratorio con más Ventas UND",
-      value: "LaboratorioConMasVentas",
-      criterio: "unidades",
-    },
+          // 🔹 Laboratorios
+          {
+            name: "Laboratorio con más Ventas USD",
+            value: "LaboratorioConMasVentas",
+            criterio: "monto",
+          },
+          {
+            name: "Laboratorio con más Ventas UND",
+            value: "LaboratorioConMasVentas",
+            criterio: "unidades",
+          },
 
-    { name: "Valores de Inventario", value: "Inventario" },
-  ];
+          { name: "Valores de Inventario", value: "Inventario" },
+        ];
 
       default:
         return [];
@@ -168,26 +168,27 @@ case "Estadísticos":
   // };
 
   const handleItemClick = (graph) => {
-  localStorage.setItem("selectedGraph", graph.value);
-  localStorage.setItem("selectedGraphName", graph.name);
-  localStorage.setItem("selectedCategory", category);
+    localStorage.setItem("selectedGraph", graph.value);
+    localStorage.setItem("selectedGraphName", graph.name);
+    localStorage.setItem("selectedCategory", category);
 
-  if (graph.criterio) {
-    setCriterio(graph.criterio);
-    localStorage.setItem("criterio", graph.criterio);
-  }
+    if (graph.criterio) {
+      setCriterio(graph.criterio);
+      localStorage.setItem("criterio", graph.criterio);
+    }
 
-  setCurrentSelectedGraph(graph.value);
+    setCurrentSelectedGraph(graph.value);
 
-  const graphType =
-    category === "Estadísticos"
-      ? "Texto"
-      : defaultChartTypes[graph.name] || defaultGraphType;
+    const graphType =
+      category === "Estadísticos"
+        ? "Texto"
+        : defaultChartTypes[graph.name] || defaultGraphType;
 
-  setSelectedGraphType(graphType);
-  localStorage.setItem("selectedGraphType", graphType);
-};
+    setSelectedGraphType(graphType);
+    localStorage.setItem("selectedGraphType", graphType);
+  };
 
+  const { mutateAsync: fetchKpiData, isPending } = useKpiDataMutation();
 
   const handleFetchChartData = async () => {
     if (!instanciaUser) return;
@@ -196,40 +197,23 @@ case "Estadísticos":
     const typeCompanies = localStorage.getItem("typeCompanies");
     const dateRange = JSON.parse(localStorage.getItem("dateRange"));
     const { from, to } = dateRange;
-
-    const fromDate = new Date(from).toLocaleDateString("en-CA");
-    const toDate = new Date(to).toLocaleDateString("en-CA");
     const kpiSelected = localStorage.getItem("selectedGraph");
 
     try {
-      const endpoint =
-        category === "Estadísticos" || kpiSelected === "flujoDeCaja"
-          ? "/kpi/custom"
-          : "/filter-data";
+      const { data, lastSyncDate, fromDate, toDate } = await fetchKpiData({
+        category,
+        instanciaUser,
+        typeCompanies,
+        from,
+        to,
+        kpiSelected,
+        criterio,
+      });
 
-      const [dataResponse, lastDateResponse] = await Promise.all([
-        instance.post(endpoint, {
-          nombreCliente: instanciaUser,
-          nombreTabla: "ventas",
-          fechaInicio: from,
-          fechaFin: to,
-          kpi: kpiSelected,
-          typeCompanies,
-          // Agregamos criterio solo para ProductosTOP y LaboratorioConMasVentas
-          criterio:
-            kpiSelected === "ProductosTOP" ||
-            kpiSelected === "LaboratorioConMasVentas"
-              ? criterio
-              : undefined,
-        }),
-        instance.post("/lastDateSincro", { cliente: instanciaUser }),
-      ]);
-
-      if (lastDateResponse.data?.data) {
-        localStorage.setItem("lastdateSincro", lastDateResponse.data.data);
+      if (lastSyncDate) {
+        localStorage.setItem("lastdateSincro", lastSyncDate);
       }
 
-      const data = dataResponse.data;
       const resultsExist =
         data?.results || (Array.isArray(data) && data.length > 0);
 
@@ -257,6 +241,8 @@ case "Estadísticos":
       }
     } catch (error) {
       console.error("Error fetching chart data:", error);
+      const fromDate = new Date(from).toLocaleDateString("en-CA");
+      const toDate = new Date(to).toLocaleDateString("en-CA");
       setNoDataMessage(
         `No hay datos disponibles para el rango de fechas seleccionado (${fromDate} / ${toDate}).`
       );
@@ -285,7 +271,7 @@ case "Estadísticos":
     await handleFetchChartData();
     setModalState({ open: false, message: "", status: "" });
     setIsButtonDisabled(false);
-    setTimeout(() => setIsButtonDisabled(false), 5000);
+    setIsButtonDisabled(false), 5000
   };
 
   const handleClose = () => {
@@ -321,24 +307,23 @@ case "Estadísticos":
               {category === "Estadísticos" ? "Análisis" : "Gráficos"} {category}
             </h2>
 
-<ul className="li">
-  {getGraphs().map((graph) => (
-    <li
-      key={graph.name}
-      className={`separate ${
-        currentSelectedGraph === graph.value &&
-        (graph.criterio ? criterio === graph.criterio : true)
-          ? "selected"
-          : ""
-      }`}
-      onClick={() => handleItemClick(graph)}
-    >
-      <div className="list">
-        <div className="gra-li">{graph.name}</div>
-      </div>
-    </li>
-  ))}
-</ul>
+            <ul className="li">
+              {getGraphs().map((graph) => (
+                <li
+                  key={graph.name}
+                  className={`separate ${currentSelectedGraph === graph.value &&
+                    (graph.criterio ? criterio === graph.criterio : true)
+                    ? "selected"
+                    : ""
+                    }`}
+                  onClick={() => handleItemClick(graph)}
+                >
+                  <div className="list">
+                    <div className="gra-li">{graph.name}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
 
 
 
@@ -354,7 +339,7 @@ case "Estadísticos":
               </button>
               <button
                 onClick={handleSearchGraph}
-                disabled={isButtonDisabled || !currentSelectedGraph}
+                disabled={isButtonDisabled || !currentSelectedGraph || isPending}
               >
                 {category === "Estadísticos"
                   ? "Ver estadística"

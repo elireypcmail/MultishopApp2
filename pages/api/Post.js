@@ -2,20 +2,17 @@ import instance from '@g/api'
 
 export const loginUser = async (cliente) => {
   try {
-    const response = await instance.post('/login/user', cliente)
-    // console.log(response);
-    // console.log(response.status);
-    // console.log(response.data.tokenCode)
-    return response.data
+    const response = await instance.post('/clients/login', cliente)
+    const data = response.data
+    return data
   } catch (error) {
-    console.error('Error en la solicitud de login:', error)
     throw error
   }
 }
 
 export const verifyToken = async (token) => {
   try {
-    const response = await instance.post('/verify-token', {}, {
+    const response = await instance.post('/clients/verify-token', {}, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -29,7 +26,7 @@ export const verifyToken = async (token) => {
 
 export const getParametros = async () => {
   try {
-    const response = await instance.get('/parametros')
+    const response = await instance.get('/clients/parameters')
     // console.log(response);
     // console.log(response.status);
     // console.log(response.data)    
@@ -43,7 +40,7 @@ export const getParametros = async () => {
 
 export const generateToken = async (data) => {
   try {
-    const response = await instance.post('/generate-code', data)
+    const response = await instance.post('/clients/generate-code', data)
     // console.log(response);
     // console.log(response.status);
     // console.log(response.data)    
@@ -57,7 +54,7 @@ export const generateToken = async (data) => {
 
 export const validateToken = async (data) => {
   try {
-    const response = await instance.put('/validate-code', data)
+    const response = await instance.put('/clients/validate-code', data)
     // console.log(response);
     // console.log(response.status);
     // console.log(response.data)    
@@ -82,14 +79,10 @@ export const validateToken = async (data) => {
 
 export const disabledToken = async (data) => {
   try {
-    const response = await instance.put('/disable-code', data)
-    // console.log(response);
-    // console.log(response.status);
-    // console.log(response.data)    
+    const response = await instance.put('/clients/disable-code', data)
     return response.data
   } catch (error) {
     console.log(error)
-    console.error('Error en la solicitud del code:', error)
     throw error
   }
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import ModalToken from "./ModalToken";
 import Link from "next/link";
-import { removeCookie, getCookie } from "@g/cookies";
+import { getCookie } from "@g/cookies";
 import { useRouter } from "next/router";
+import { useSession } from "@g/SessionContext";
 import {
   CalendarRange,
   CategoryGraph,
@@ -14,10 +15,11 @@ import { FaKey } from "react-icons/fa6";
 
 export default function FooterGraph() {
   const { push } = useRouter();
+  const { logout: logoutSession } = useSession();
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [showTokenBadge, setShowTokenBadge] = useState(false);
 
-  const userId = getCookie("instancia"); 
+  const userId = getCookie("instancia");
   const storageKey = `token_seen_${userId}`;
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export default function FooterGraph() {
   };
 
   const logout = () => {
-    removeCookie("instancia");
+    logoutSession();
     push("/");
   };
 

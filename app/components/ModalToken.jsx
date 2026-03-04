@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { CloseModal } from "./Icons"
 import { AiOutlineLoading3Quarters } from "react-icons/ai"
-import { generateToken, validateToken, disabledToken } from "../../pages/api/Post"
+import { useGenerateTokenMutation, useValidateTokenMutation, useDisableTokenMutation } from "@g/useTokenMutations"
 import Cookies from "js-cookie"
 
 const DURATION = 60
@@ -11,14 +11,18 @@ const ModalToken = ({ onClose }) => {
   const [code, setCode] = useState(null)
   const [closing, setClosing] = useState(false)
   const [withTransition, setWithTransition] = useState(true)
-
+  const ref = useRef(true)
   const timerRef = useRef(null)
   const generatingRef = useRef(false)
 
   const identificacion = Cookies.get("instancia")
   const id_user = localStorage.getItem("idUser")
 
-  const createToken = async () => {
+  const { mutateAsync: generateTokenMutate } = useGenerateTokenMutation()
+  const { mutateAsync: validateTokenMutate } = useValidateTokenMutation()
+  const { mutateAsync: disableTokenMutate } = useDisableTokenMutation()
+
+  const createToken = useCallback(async () => {
     if (generatingRef.current) return
     generatingRef.current = true
 
@@ -27,9 +31,9 @@ const ModalToken = ({ onClose }) => {
 
     try {
       const newCode = Math.floor(100000 + Math.random() * 900000)
-      await generateToken({ identificacion, id_user, codigo: newCode })
-
+      await generateTokenMutate({ identificacion, id_user, codigo: newCode })
       setCode(newCode)
+      ref.current = true
       setTimeLeft(DURATION)
 
       // Reactivamos todo tras un breve instante
@@ -42,36 +46,26 @@ const ModalToken = ({ onClose }) => {
     } finally {
       generatingRef.current = false
     }
-  }
+  }, [identificacion, id_user, generateTokenMutate])
 
-  useEffect(() => {
-    createToken()
-    return () => clearInterval(timerRef.current)
-  }, [])
-
-  useEffect(() => {
-    if (!code) return
+  const handleClose = useCallback(async (manual = true) => {
     clearInterval(timerRef.current)
+    if (manual && code) {
+      try { await disableTokenMutate({ identificacion, id_user, codigo: code }) } catch (_) { }
+    }
+    setClosing(true)
+    setTimeout(() => {
+      onClose()
+      setClosing(false)
+    }, 300)
+  }, [identificacion, id_user, code, disableTokenMutate, onClose])
 
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 0) {
-          clearInterval(timerRef.current)
-          handleExpire()
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
 
-    return () => clearInterval(timerRef.current)
-  }, [code])
-
-  const handleExpire = async () => {
+  const handleExpire = useCallback(async () => {
     try {
-      const res = await validateToken({ identificacion, id_user, codigo: code })
+      const res = await validateTokenMutate({ identificacion, id_user, codigo: code })
       if (res.valid) {
-        await disabledToken({ identificacion, id_user, codigo: code })
+        await disableTokenMutate({ identificacion, id_user, codigo: code })
         await createToken()
         return
       }
@@ -79,26 +73,41 @@ const ModalToken = ({ onClose }) => {
     } catch (err) {
       console.error("Error al validar token", err)
     }
-  }
+  }, [code, disableTokenMutate, createToken, handleClose, identificacion, id_user, validateTokenMutate])
 
-  const handleClose = async (manual = true) => {
+  useEffect(() => {
+    createToken()
+    return () => clearInterval(timerRef.current)
+  }, [createToken])
+
+  useEffect(() => {
+    if (!code) return
     clearInterval(timerRef.current)
-    if (manual && code) {
-      try { await disabledToken({ identificacion, id_user, codigo: code }) } catch (_) {}
-    }
-    setClosing(true)
-    setTimeout(() => {
-      onClose()
-      setClosing(false)
-    }, 300)
-  }
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 0 && ref.current === true) {
+          ref.current = false
+          clearInterval(timerRef.current)
+          handleExpire()
+          return 0
+        }
+        if (ref.current === false) {
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timerRef.current)
+  }, [code, handleExpire, ref, identificacion, id_user])
 
   /* =========================
       UI PROGRESS (INVERTIDO)
   ========================= */
   const radius = 60
   const circumference = 2 * Math.PI * radius
-  
+
   // PROGRESO AL REVÉS: 
   // Al inicio (timeLeft=60), dashOffset = circunferencia (vacío)
   // Al final (timeLeft=0), dashOffset = 0 (lleno)
@@ -115,8 +124,8 @@ const ModalToken = ({ onClose }) => {
         <h2 className="ti-graph">Código de Seguridad</h2>
 
         {code ? (
-          <h2 className={`gra-li-token ${!withTransition ? "blur-effect" : ""}`} 
-              style={{ transition: 'filter 0.3s ease, opacity 0.3s ease', opacity: withTransition ? 1 : 0.3 }}>
+          <h2 className={`gra-li-token ${!withTransition ? "blur-effect" : ""}`}
+            style={{ transition: 'filter 0.3s ease, opacity 0.3s ease', opacity: withTransition ? 1 : 0.3 }}>
             {code.toString().replace(/(\d{3})(\d{3})/, "$1 $2")}
           </h2>
         ) : (

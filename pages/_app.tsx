@@ -1,9 +1,16 @@
 import type { AppProps } from "next/app";
+import { useState } from "react";
 import '@s/_index.scss'
 import '@s/globals.css'
 import Head from "next/head";
+import { SessionProvider } from "@g/SessionContext";
+import RouteGuard from "@g/RouteGuard";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sileo";
 
 export default function App({ Component, pageProps }: AppProps) {
+  const [queryClient] = useState(() => new QueryClient());
+
   return (
     <>
       <Head>
@@ -16,7 +23,14 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <meta name="apple-mobile-web-app-title" content="Multishop KPI" />
       </Head>
-      <Component {...pageProps} />
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>
+          <RouteGuard>
+            <Component {...pageProps} />
+          </RouteGuard>
+          <Toaster position="top-right" />
+        </SessionProvider>
+      </QueryClientProvider>
     </>
   )
 }

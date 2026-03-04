@@ -2,23 +2,33 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import multishop from '@p/Logo Sistema Multishop Pequeno.png'
 import { useRouter } from 'next/router'
-import { setCookie } from '@g/cookies'
-import { loginUser, verifyToken, getParametros } from '@api/Post'
+import { useLoginMutation } from '@g/useLoginMutation'
+import { useParametrosQuery } from '@g/useParametrosQuery'
 import { UserLogin, Identificacion, Clave, HidePassword, VisiblePassword, ReloadIcon } from '@c/Icons'
-import toast, { Toaster } from 'react-hot-toast'
+import { sileo } from 'sileo'
 import ModalTerms from './ModalTerms'
 
 export default function Login() {
   const [cliente, setCliente] = useState({ login_user: '', clave: '' })
   const [showPassword, setShowPassword] = useState(false)
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false)
-  const [modalState, setModalState] = useState({ open: false, message: '', status: '' })
   const [showTermsModal, setShowTermsModal] = useState(false)
-  const [codeVersion, setCodeVersion] = useState('')
   const { push } = useRouter()
+  const { mutate: loginMutate, isPending } = useLoginMutation()
+  const { data: parametros } = useParametrosQuery()
 
-  const notifyError = (msg) => toast.error(msg)
-  const notifySucces = (msg) => toast.success(msg)
+  const codeVersion = parametros?.data?.version ?? ''
+
+  const notifyError = (msg) =>
+    sileo.error({
+      title: 'Error',
+      description: msg,
+    })
+
+  const notifySucces = (msg) =>
+    sileo.success({
+      title: 'Éxito',
+      description: msg,
+    })
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -26,83 +36,34 @@ export default function Login() {
   }
 
   useEffect(() => {
-    const checkVersion = async () => {
-      try {
-        const res = await getParametros();
-        console.log(res.data)
-        if (res?.data) {
-          localStorage.setItem('version', res.data.version)
-          localStorage.setItem('timeExpire', res.data.tiempo)
-          setCodeVersion(res.data.version);
-        } else {
-          console.error('Error: No se pudo obtener la versión de la aplicación.');
-        }
-      } catch (error) {
-        console.error('Error al verificar la versión:', error);
-      }
-    };
-  
-    checkVersion();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsButtonDisabled(true)
-    setModalState({ open: true, message: 'Cargando...', status: 'loading' })
-    
-    try {
-      const res = await loginUser(cliente)
-      if (res?.tokenCode) {
-        const tokenRes = await verifyToken(res.tokenCode)
-        if (tokenRes.message === 'Suscripción activa') {
-          setCookie('instancia', res.identificacion)
-          localStorage.setItem('defaultGraphType', res.type_graph)
-          localStorage.setItem('typeCompanies', res.type_comp)
-          localStorage.setItem('idUser', res.userId)
-          
-          const now = new Date()
-          localStorage.setItem('loginTime', now.toISOString())
-
-          setModalState({ open: true, message: '¡Haz iniciado sesión!', status: 'success' })
-          notifySucces('Haz iniciado sesión!')
-          
-          setTimeout(() => {
-            push('/date').then(() => {
-              setModalState({ open: false, message: '', status: '' })
-              setIsButtonDisabled(false)
-            })
-          }, 500)
-        } else if (tokenRes.message === 'El token ha expirado') {
-          setModalState({ open: true, message: 'Su suscripción ha vencido. Por favor realice la renovación. Contáctenos', status: 'error' })
-          notifyError('Su suscripción ha vencido. Por favor realice la renovación. Contáctenos')
-        } else if (tokenRes.message.startsWith('Faltan ') || tokenRes.message.startsWith('Su suscripción ')) {
-          setModalState({ open: true, message: tokenRes.message, status: 'error' })
-
-          setCookie('instancia', res.identificacion)
-          localStorage.setItem('defaultGraphType', res.type_graph)
-          localStorage.setItem('typeCompanies', res.type_comp)
-          notifySucces(tokenRes.message)
-
-          const now = new Date()
-          localStorage.setItem('loginTime', now.toISOString())
-
-          setTimeout(() => {
-            push('/date').then(() => {
-              setModalState({ open: false, message: '', status: '' })
-              setIsButtonDisabled(false)
-            })
-          }, 1000)
-        }
-      }
-    } catch (error) {
-      setModalState({ open: true, message: error?.response?.data?.message || 'Error en la solicitud.', status: 'error' })
-      notifyError(error?.response?.data?.message)
-      console.error('Error en la solicitud:', error)
-      setTimeout(() => {
-        setModalState({ open: false, message: '', status: '' })
-        setIsButtonDisabled(false)
-      }, 5000)
+    if (parametros?.data) {
+      localStorage.setItem('version', parametros.data.version)
+      localStorage.setItem('timeExpire', parametros.data.tiempo)
     }
+  }, [parametros])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+
+    loginMutate(cliente, {
+      onSuccess: ({ tokenRes, status }) => {
+        if (status === 'active') {
+          notifySucces('Haz iniciado sesión!')
+          push('/date')
+        } else if (status === 'expired') {
+          notifyError('Su suscripción ha vencido. Por favor realice la renovación. Contáctenos')
+        } else if (status === 'partial') {
+          notifySucces(tokenRes.message)
+          push('/date')
+        } else {
+          notifyError(tokenRes?.message || 'Error en el inicio de sesión.')
+        }
+      },
+      onError: (error) => {
+        const message = error?.response?.data?.message || 'Error en la solicitud.'
+        notifyError(message)
+      },
+    })
   }
 
   const handlePasswordToggle = () => {
@@ -111,7 +72,6 @@ export default function Login() {
 
   return (
     <div className="body">
-      <Toaster position="top-right" reverseOrder={true} duration={5000} />
       <div className="container">
         <div className="container-form">
           <div className="user">
@@ -145,7 +105,7 @@ export default function Login() {
                 </i>
               </div>
               <div className="btn">
-                <button className="button" type="submit" disabled={isButtonDisabled}>
+                <button className="button" type="submit" disabled={isPending}>
                   Iniciar Sesión
                 </button>
               </div>
@@ -157,8 +117,8 @@ export default function Login() {
             </form>
           </div>
         </div>
-        
-        {modalState.open && modalState.status === 'loading' && (
+
+        {isPending && (
           <div className="modal-login-loading">
             <ReloadIcon className="icon-loading" />
           </div>

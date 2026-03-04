@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { defaultChartTypes }          from '@conf/defaultChartTypes'
-import { 
-  CloseModal, 
-  BarGraph, 
-  CircularGraph, 
-  LineGraph 
+import { defaultChartTypes } from '@conf/defaultChartTypes'
+import {
+  CloseModal,
+  BarGraph,
+  CircularGraph,
+  LineGraph
 } from './Icons'
 
 const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
@@ -31,10 +31,8 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
 
   const handleClose = () => {
     setClosing(true)
-    setTimeout(() => {
-      onClose()
-      setClosing(false)
-    }, 300)
+    onClose()
+    setClosing(false)
   }
 
   const handleSave = () => {
@@ -52,8 +50,8 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
         <h2 className="ti-graph">Tipos de Gráficos</h2>
         <ul className="li">
           {graphTypes.map((graphType, index) => (
-            <li 
-              key={index} 
+            <li
+              key={index}
               className={`separate ${currentSelectedGraphType === graphType.name ? 'selected' : ''}`}
               onClick={() => handleItemClick(graphType)}
             >

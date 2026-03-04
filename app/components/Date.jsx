@@ -38,26 +38,24 @@ export default function DateComponent() {
   useEffect(() => {
     const savedTime = localStorage.getItem("loginTime");
     const timeExpire = Number(localStorage.getItem("timeExpire")); // Asegura que es un número
-  
+
     if (savedTime && !isNaN(timeExpire)) {
       const savedDate = new Date(savedTime);
       const now = new Date();
-  
+
       const diffInMs = now - savedDate;
       const diffInHours = diffInMs / (1000 * 60 * 60);
-      
+
       if (diffInHours >= timeExpire) {
         setShowSessionExpiredModal(true);
-  
+
         // IMPORTANTE: hacer push('/') después de mostrar el modal
-        setTimeout(() => {
-          removeCookie('instancia');
-          push('/');
-        }, 3000);
+        removeCookie('instancia');
+        push('/');
       }
     }
-  }, []);
-  
+  }, [push]);
+
 
   useEffect(() => {
     if (darkMode) {

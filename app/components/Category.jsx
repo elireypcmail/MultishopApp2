@@ -1,22 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image                   from 'next/image'
-import { useRouter }           from 'next/router'
-import { ArrowLeft }           from './Icons'
-import multishop               from '@p/Logo Sistema Multishop Pequeno.png'
-import FooterGraph             from './Footer'
-import { 
-  Financial, 
-  Operative, 
-  Statistical, 
-  Sun, 
-  Moon 
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { ArrowLeft } from './Icons'
+import multishop from '@p/Logo Sistema Multishop Pequeno.png'
+import FooterGraph from './Footer'
+import {
+  Financial,
+  Operative,
+  Statistical,
+  Sun,
+  Moon
 } from './Icons'
 
 export default function Category() {
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [darkMode, setDarkMode]                 = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -89,21 +89,21 @@ export default function Category() {
           </div>
 
           <div className="row-ca">
-            <div 
+            <div
               className={`categoria ${selectedCategory === 'Financieros' ? 'active' : ''}`}
               onClick={() => handleCategoryClick('Financieros')}
             >
               <Financial />
               <span className='ca-ti'>Análisis Financiero</span>
             </div>
-            <div 
+            <div
               className={`categoria ${selectedCategory === 'Operativos' ? 'active' : ''}`}
               onClick={() => handleCategoryClick('Operativos')}
             >
               <Operative />
               <span className='ca-ti'>Análisis Operativo</span>
             </div>
-            <div 
+            <div
               className={`categoria ${selectedCategory === 'Estadísticos' ? 'active' : ''}`}
               onClick={() => handleCategoryClick('Estadísticos')}
             >
@@ -111,7 +111,7 @@ export default function Category() {
               <span className='ca-ti'>Análisis Estadístico</span>
             </div>
           </div>
-          
+
           <div className="button__graph">
             <button className='btn' onClick={backRouter}>
               <ArrowLeft></ArrowLeft>

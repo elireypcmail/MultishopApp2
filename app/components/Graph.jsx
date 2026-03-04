@@ -30,7 +30,6 @@ export default function Graph() {
   const [nameGraph, setNameGraph] = useState("");
   const [dateGraph, setDateGraph] = useState("");
   const [currentGraphType, setCurrentGraphType] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [noDataMessage, setNoDataMessage] = useState("");
   const [category, setCategory] = useState("");
   const [typeRange, setTypeRange] = useState("");
@@ -39,7 +38,6 @@ export default function Graph() {
   const [confirmedCompany, setConfirmedCompany] = useState(null);
   const [typeCompanies, setTypeCompanies] = useState("");
   const [lastDateSincro, setLastDateSincro] = useState("");
-  const [lastDateSincroHour, setLastDateSincroHour] = useState("");
   const [showGraphTypeModal, setShowGraphTypeModal] = useState(false);
   const [criterio, setCriterio] = useState("monto"); // valor por defecto
 
@@ -110,9 +108,6 @@ export default function Graph() {
 
     if (date) {
       const lastest = new Date(lastdateSincronizate);
-
-      console.log(lastest);
-
       // const dateAct = lastest.toISOString().slice(0, 10); // "2025-04-23"
       const dateAct = lastest.toLocaleDateString("en-CA", {
         timeZone: "America/Caracas",
@@ -125,7 +120,6 @@ export default function Graph() {
       });
 
       const formatted = `${dateAct} ${time.toLowerCase()}`;
-      console.log(formatted);
 
       const from = new Date(date.from);
       const to = new Date(date.to);
@@ -174,8 +168,6 @@ export default function Graph() {
     const chartData = chartDataState.results || chartDataState;
 
     let selectedGraph = localStorage.getItem("selectedGraph");
-
-    console.log(selectedGraph);
 
     if (selectedGraph === "flujoDeCaja") return renderStatisticalData();
 
@@ -471,8 +463,8 @@ export default function Graph() {
 
     const sortKey =
       (nameGraph.includes("Productos más vendidos") ||
-      nameGraph.includes("Laboratorio con más Ventas")) &&
-      criterio === "unidades"
+        nameGraph.includes("Laboratorio con más Ventas")) &&
+        criterio === "unidades"
         ? "unidades_vendidas"
         : sortCriteriaMap[nameGraph] || "total_ventas";
 
@@ -655,9 +647,9 @@ export default function Graph() {
                           {criterio === "unidades"
                             ? `${main.toLocaleString("es-ES")} UND`
                             : `$${main.toLocaleString("es-ES", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}`}
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`}
                         </div>
                       )}
                   </div>
