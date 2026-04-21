@@ -1,5 +1,3 @@
-'use client'
-
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { setCookie, removeCookie } from '@g/cookies'
 import { authenticateWithCredentials } from '@g/authService'
