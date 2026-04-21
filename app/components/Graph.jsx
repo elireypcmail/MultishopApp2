@@ -4,7 +4,11 @@ import FooterGraph from "./Footer";
 import BarChartComponent from "./BarChart";
 import PieChartComponent from "./PieChart";
 import LineChartComponent from "./AreaChart";
+// Mixed
 import BarChartMixedComponent from "./BarChartMixed";
+import PieChartMixedComponent from "./PieChartMixed";
+import LineChartMixedComponent from "./AreaChartMidex";
+
 import { defaultChartTypes } from "@conf/defaultChartTypes";
 import GraphTypeModal from "./GraphType";
 import {
@@ -147,13 +151,84 @@ export default function Graph() {
     }
   };
 
+  // const renderChart = () => {
+  //   if (noDataMessage) {
+  //     return (
+  //       <div className="not-found">
+  //         <div className="icon-not-found">
+  //           <NotFound />
+  //         </div>
+  //         <span>{noDataMessage}</span>
+  //       </div>
+  //     );
+  //   }
+
+  //   if (!chartDataState) {
+  //     return <div>Cargando datos...</div>;
+  //   }
+
+  //   if (category === "Estadísticos") return renderStatisticalData();
+
+  //   const chartData = chartDataState.results || chartDataState;
+
+  //   let selectedGraph = localStorage.getItem("selectedGraph");
+
+  //   if (selectedGraph === "flujoDeCaja") return renderStatisticalData();
+
+  //   let typeCompanies = localStorage.getItem("typeCompanies");
+
+  //   if (selectedGraph == "ventasVScompras" || typeCompanies == "Multiple") {
+  //     return (
+  //       <BarChartMixedComponent
+  //         data={chartData}
+  //         dateRange={chartDataState.dateRange}
+  //         dateTypeRange={typeRange}
+  //       />
+  //     );
+  //   }
+
+  //   switch (currentGraphType) {
+  //     case "Barra":
+  //       return (
+  //         <BarChartComponent
+  //           data={chartData}
+  //           dateRange={chartDataState.dateRange}
+  //           dateTypeRange={typeRange}
+  //         />
+  //       );
+  //     case "Torta":
+  //       return (
+  //         <PieChartComponent
+  //           data={chartData}
+  //           dateRange={chartDataState.dateRange}
+  //           dateTypeRange={typeRange}
+  //         />
+  //       );
+  //     case "Línea":
+  //       return (
+  //         <LineChartComponent
+  //           data={chartData}
+  //           dateRange={chartDataState.dateRange}
+  //           dateTypeRange={typeRange}
+  //         />
+  //       );
+  //     default:
+  //       return (
+  //         <div className="not-found">
+  //           <div className="icon-not-found">
+  //             <NotFound />
+  //           </div>
+  //           <span>No se ha seleccionado ningún tipo de gráfico válido.</span>
+  //         </div>
+  //       );
+  //   }
+  // };
+
   const renderChart = () => {
     if (noDataMessage) {
       return (
         <div className="not-found">
-          <div className="icon-not-found">
-            <NotFound />
-          </div>
+          <div className="icon-not-found"><NotFound /></div>
           <span>{noDataMessage}</span>
         </div>
       );
@@ -166,23 +241,52 @@ export default function Graph() {
     if (category === "Estadísticos") return renderStatisticalData();
 
     const chartData = chartDataState.results || chartDataState;
-
-    let selectedGraph = localStorage.getItem("selectedGraph");
+    const selectedGraph = localStorage.getItem("selectedGraph");
+    const typeCompanies = localStorage.getItem("typeCompanies");
 
     if (selectedGraph === "flujoDeCaja") return renderStatisticalData();
 
-    let typeCompanies = localStorage.getItem("typeCompanies");
-
-    if (selectedGraph == "ventasVScompras" || typeCompanies == "Multiple") {
-      return (
-        <BarChartMixedComponent
-          data={chartData}
-          dateRange={chartDataState.dateRange}
-          dateTypeRange={typeRange}
-        />
-      );
+    // --- LÓGICA PARA MULTIEMPRESA O COMPARATIVAS (MIXED) ---
+    if (selectedGraph === "ventasVScompras" || typeCompanies === "Multiple") {
+      switch (currentGraphType) {
+        case "Barra":
+          return (
+            <BarChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+        case "Torta":
+          return (
+            <PieChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+        case "Línea":
+          // Nota: Asegúrate de que LineChartMixedComponent esté bien importado 
+          // En tu código original importaste BarChartMixedComponent dos veces
+          return (
+            <LineChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+        default:
+          return (
+            <BarChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+      }
     }
 
+    // --- LÓGICA PARA EMPRESA ÚNICA (ESTÁNDAR) ---
     switch (currentGraphType) {
       case "Barra":
         return (
@@ -211,14 +315,13 @@ export default function Graph() {
       default:
         return (
           <div className="not-found">
-            <div className="icon-not-found">
-              <NotFound />
-            </div>
+            <div className="icon-not-found"><NotFound /></div>
             <span>No se ha seleccionado ningún tipo de gráfico válido.</span>
           </div>
         );
     }
   };
+
 
   const renderStatisticalData = () => {
     if (!chartDataState || Object.keys(chartDataState).length === 0) {
@@ -245,33 +348,52 @@ export default function Graph() {
       const parse = (v) => {
         if (v === null || v === undefined) return 0;
         if (typeof v === "number") return v;
-        return (
-          parseFloat(v.toString().replace(/\./g, "").replace(/,/g, ".")) || 0
-        );
+        
+        let str = v.toString().trim();
+        
+        // Si el string tiene una coma, asumimos formato es-ES (1.234,56)
+        if (str.includes(",")) {
+          str = str.replace(/\./g, "").replace(/,/g, ".");
+        } 
+        // Si no tiene coma pero tiene punto, y el punto está cerca del final (1 o 2 decimales)
+        // asumimos que es formato DB/US (214.13) y no hacemos el replace de puntos.
+        
+        const n = parseFloat(str);
+        return isNaN(n) ? 0 : n;
       };
 
-      // KPIs donde se permite mostrar Total Unidades
+      // Ajustamos para que coincida con lo que viene del backend (ProductosTOP)
+      // y lo que espera tu frontend (USD/UND)
       const showTotalUnidadesKPIs = [
         "Productos más vendidos USD",
         "Productos más vendidos UND",
         "Laboratorio con más Ventas USD",
         "Laboratorio con más Ventas UND",
+        "ProductosTOP" // Agregado para asegurar compatibilidad
       ];
 
+      console.log("criterio:", criterio);
+      console.log("value")
+      console.log(value)
+
+      // Caso: Criterio UNIDADES
       if (criterio === "unidades") {
         return {
           main: parse(value.unidades_vendidas ?? value.total_unidades ?? 0),
-          secondary: parse(value.total_ventas ?? 0),
+          secondary: parse(value.total_ventas ?? value.totusd ?? 0),
         };
       }
 
-      // Si no es KPI de productos/laboratorios, no devolver total_unidades
-      const secondaryValue = showTotalUnidadesKPIs.includes(nameGraph)
+      // Caso: Criterio MONTO (Default)
+      // Verificamos si el nombre del gráfico actual debe mostrar unidades como valor secundario
+      const shouldShowSecondary = showTotalUnidadesKPIs.some(kpi => nameGraph.includes(kpi));
+
+      const secondaryValue = shouldShowSecondary
         ? parse(value.total_unidades ?? value.unidades_vendidas ?? 0)
         : 0;
 
       return {
-        main: parse(value.total_ventas ?? 0),
+        main: parse(value.total_ventas ?? value.totusd ?? 0),
         secondary: secondaryValue,
       };
     };
