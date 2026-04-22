@@ -64,8 +64,7 @@ export default function BarChartComponent({
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log("PieChartComponent: Received data:", data);
-
+    
     let kpiType = data[0]?.kpiType;
 
     if (kpiType) {
@@ -99,7 +98,6 @@ export default function BarChartComponent({
 
   const formattedData = useMemo(() => {
     if (Array.isArray(data) && data.length > 0) {
-      console.log("BarChartComponent: Processing data...");
       const sortedData = [...data].sort(
         (a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime()
       );
@@ -112,14 +110,12 @@ export default function BarChartComponent({
         fill: blueShades[index],
       }));
 
-      console.log("BarChartComponent: Formatted Data:", formatted);
       return formatted;
     }
     console.warn("BarChartComponent: Invalid or empty data received");
     return [];
   }, [data]);
 
-  console.log("BarChartComponent: Final formatted data:", formattedData);
 
   const totalGeneral = useMemo(() => {
     return formattedData.reduce((sum, item) => sum + item.total, 0);

@@ -46,15 +46,15 @@ export async function fetchKpiAndLastSync({
   const data = dataResponse.data
   const lastSyncDate = lastDateResponse.data?.data ?? null
 
-  console.log(data);
-  console.log(lastSyncDate);
-  console.log(fromDate);
-  console.log(toDate);
-  console.log(kpiSelected);
-  console.log(criterio);
-  console.log(typeCompanies);
-  console.log(customKpiBody)
-  console.log(filterDataBody)
+  // console.log(data);
+  // console.log(lastSyncDate);
+  // console.log(fromDate);
+  // console.log(toDate);
+  // console.log(kpiSelected);
+  // console.log(criterio);
+  // console.log(typeCompanies);
+  // console.log(customKpiBody)
+  // console.log(filterDataBody)
   return { data, lastSyncDate, fromDate, toDate }
 }
 

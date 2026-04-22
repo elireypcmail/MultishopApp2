@@ -32,7 +32,7 @@ export const getParametros = async () => {
     // console.log(response.data)    
     return response.data
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     console.error('Error en la solicitud de login:', error)
     throw error
   }
@@ -46,7 +46,7 @@ export const generateToken = async (data) => {
     // console.log(response.data)    
     return response.data
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     console.error('Error en la solicitud del code:', error)
     throw error
   }
@@ -60,7 +60,7 @@ export const validateToken = async (data) => {
     // console.log(response.data)    
     return response.data
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     console.error('Error en la solicitud del code:', error)
     throw error
   }
@@ -82,7 +82,7 @@ export const disabledToken = async (data) => {
     const response = await instance.put('/clients/disable-code', data)
     return response.data
   } catch (error) {
-    console.log(error)
+    // console.log(error)
     throw error
   }
 }
