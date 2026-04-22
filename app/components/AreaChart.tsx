@@ -57,8 +57,6 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    console.log('LineChartComponent: Received data:', data)
-    
     const graphName = localStorage.getItem("selectedGraphName")
     setName(graphName || '')
 
@@ -84,7 +82,6 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
 
   const formattedData = useMemo(() => {
     if (Array.isArray(data) && data.length > 0) {
-      console.log('LineChartComponent: Processing data...')
       const sortedData = [...data].sort((a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime())
       
       const formatted = sortedData.map(item => ({
@@ -92,8 +89,6 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
         total: parseFloat(item.total_valor),
         promedio: parseFloat(item.promedio_valor),
       }))
-
-      console.log('LineChartComponent: Formatted Data:', formatted)
       return formatted
     }
     console.warn('LineChartComponent: Invalid or empty data received')
@@ -108,7 +103,6 @@ export default function LineChartComponent({ data, dateRange }: LineChartCompone
     return formattedData.length > 0 ? totalGeneral / formattedData.length : 0
   }, [formattedData, totalGeneral])
   
-  console.log('LineChartComponent: Final formatted data:', formattedData)
   
   if (!data || data.length === 0) return <div>No hay datos disponibles para mostrar.</div>
 

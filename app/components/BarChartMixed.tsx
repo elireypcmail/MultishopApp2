@@ -54,7 +54,7 @@ interface BarChartComponentProps {
 }
 
 const CustomLabel = ({ x, y, width, height, value }: any) => {
-  const isDarkMode = localStorage.getItem("darkMode") === "true";
+  const isDarkMode = typeof window !== "undefined" && localStorage.getItem("darkMode") === "true";
   const textWidth = 50;
   const insideBar = width > textWidth + 10;
   const textColor = insideBar ? "white" : isDarkMode ? "white" : "black";
@@ -76,7 +76,6 @@ const CustomLabel = ({ x, y, width, height, value }: any) => {
 export default function BarChartMixedComponent({
   data,
 }: BarChartComponentProps) {
-  const [dateSincro, setDateSincro] = useState("");
   const [graphName, setName] = useState("");
   const [nameCompany, setNameCompany] = useState("");
   const [typeCompanies, setTypeCompanies] = useState("");
@@ -84,38 +83,34 @@ export default function BarChartMixedComponent({
   const cardRef = useRef(null);
 
   useEffect(() => {
-    console.log("BarChartComponent: Received data:", data);
-
-    const graphName = localStorage.getItem("selectedGraphName");
-    setName(graphName || "");
-
+    const savedGraphName = localStorage.getItem("selectedGraphName");
+    setName(savedGraphName || "");
     setNameCompany(data[0]?.nomemp);
-
     const savedTypeCompanies = localStorage.getItem("typeCompanies");
     setTypeCompanies(savedTypeCompanies || "");
   }, [data]);
 
-  const combinedData = useMemo(() => {
-    let groupedData = data.map((item) => ({
-      ...item,
-      companyName: item.nomempc,
-      total: parseFloat(item.total_valor),
-      promedio: parseFloat(item.promedio_valor),
-      label: item.label,
-      fill:
-        item.label === "Valor Total" || item.label === "Ventas"
-          ? "#3b82f6"
-          : "#001a33",
-    }));
+  const { combinedData, totalGeneral } = useMemo(() => {
+    let totalSum = 0;
+    const groupedData = data.map((item) => {
+      const val = parseFloat(item.total_valor) || 0;
+      totalSum += val;
+      return {
+        ...item,
+        companyName: item.nomempc,
+        total: val,
+        promedio: parseFloat(item.promedio_valor),
+        label: item.label,
+        fill: item.label === "Valor Total" || item.label === "Ventas" ? "#3b82f6" : "#001a33",
+      };
+    });
 
-    if (graphName === "Análisis de Ventas vs Compras") {
-      return groupedData
-    }
-    
-    return groupedData.sort((a, b) => b.total - a.total);
+    const sortedData = graphName === "Análisis de Ventas vs Compras" 
+      ? groupedData 
+      : [...groupedData].sort((a, b) => b.total - a.total);
+
+    return { combinedData: sortedData, totalGeneral: totalSum };
   }, [data, graphName]);
-
-  console.log(combinedData);
 
   if (!data.length) return <div>No hay datos disponibles para mostrar.</div>;
 
@@ -124,21 +119,14 @@ export default function BarChartMixedComponent({
       <div>
         <Card
           ref={cardRef}
-          className="w-full max-w-7xl flex flex-col justify-center items-center h-[50vh]"
+          className="w-full max-w-7xl flex flex-col justify-center items-center h-auto min-h-[40vh] pb-4"
         >
           {typeCompanies !== "Multiple" && (
-            <div
-              style={{
-                textAlign: "center",
-                fontSize: "17px",
-                fontWeight: 500,
-                marginTop: "10px",
-              }}
-            >
+            <div className="text-center text-[17px] font-medium mt-[10px] uppercase">
               {nameCompany}
             </div>
           )}
-          <CardContent>
+          <CardContent className="p-0">
             <ChartContainer
               config={chartConfig}
               style={{
@@ -146,21 +134,21 @@ export default function BarChartMixedComponent({
                 justifyContent: "center",
                 alignItems: "center",
                 height: "auto",
-                minHeight: "50vh",
+                minHeight: "45vh", // Altura reducida
                 width: "80vw",
                 overflowY: "auto",
               }}
             >
-              <BarChart accessibilityLayer data={combinedData} layout="vertical">
-                <CartesianGrid horizontal={true} />
+              <BarChart accessibilityLayer data={combinedData} layout="vertical" margin={{ right: 40 }}>
+                <CartesianGrid horizontal={true} opacity={0.2} />
                 <YAxis
                   dataKey="companyName"
                   type="category"
-                  color="#fff"
                   tickLine={false}
                   axisLine={false}
+                  className="text-[10px] font-bold uppercase"
                 />
-                <XAxis dataKey="total" type="number" />
+                <XAxis dataKey="total" type="number" hide />
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent hideLabel />}
@@ -168,10 +156,7 @@ export default function BarChartMixedComponent({
                 <Bar
                   dataKey="total"
                   layout="vertical"
-                  fill="var(--color-desktop)"
                   radius={4}
-                  width={120}
-                  height={100}
                 >
                   <LabelList
                     dataKey="total"
@@ -181,8 +166,13 @@ export default function BarChartMixedComponent({
               </BarChart>
             </ChartContainer>
           </CardContent>
+
+          <CardFooter className="flex items-center gap-2 font-semibold text-lg mt-2 border-t pt-4 w-full justify-center ">
+            Total: $ {formatNumber(totalGeneral)}
+          </CardFooter>
         </Card>
       </div>
+      
       {graphName == "Análisis de Ventas vs Compras" && (
         <div className="flex justify-center flex-row text-[1rem] gap-4 mt-4">
           <div className="flex items-center gap-2 font-medium leading-none">

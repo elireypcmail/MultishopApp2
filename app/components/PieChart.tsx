@@ -75,8 +75,6 @@ export default function PieChartComponent({
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.log("PieChartComponent: Received data:", data);
-
     let kpiType = data[0]?.kpiType;
 
     if (kpiType) {
@@ -110,7 +108,6 @@ export default function PieChartComponent({
 
   const formattedData = useMemo(() => {
     if (Array.isArray(data) && data.length > 0) {
-      console.log("PieChartComponent: Processing data...");
       const sortedData = [...data].sort(
         (a, b) => new Date(a.periodo).getTime() - new Date(b.periodo).getTime()
       );
@@ -121,8 +118,6 @@ export default function PieChartComponent({
         value: parseFloat(item.total_valor),
         fill: blueShades[index],
       }));
-
-      console.log("PieChartComponent: Formatted Data:", formatted);
 
       return formatted.filter((item) => item.value > 0);
     }
@@ -141,7 +136,6 @@ export default function PieChartComponent({
 
   const handlePieClick = (data: any, index: number) => {
     if (data && data.period) {
-      console.log("Periodo seleccionado:", data.period);
       setActivePeriod(data.period);
     } else {
       console.warn("No se pudo seleccionar el periodo.");

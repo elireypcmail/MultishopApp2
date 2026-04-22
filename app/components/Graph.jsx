@@ -4,7 +4,11 @@ import FooterGraph from "./Footer";
 import BarChartComponent from "./BarChart";
 import PieChartComponent from "./PieChart";
 import LineChartComponent from "./AreaChart";
+// Mixed
 import BarChartMixedComponent from "./BarChartMixed";
+import PieChartMixedComponent from "./PieChartMixed";
+import LineChartMixedComponent from "./AreaChartMidex";
+
 import { defaultChartTypes } from "@conf/defaultChartTypes";
 import GraphTypeModal from "./GraphType";
 import {
@@ -80,7 +84,6 @@ export default function Graph() {
     if (storedChartData) {
       try {
         const parsedData = JSON.parse(storedChartData);
-        console.log("Loaded chart data:", parsedData);
         setChartDataState(parsedData);
       } catch (error) {
         console.error("Error parsing chart data:", error);
@@ -151,9 +154,7 @@ export default function Graph() {
     if (noDataMessage) {
       return (
         <div className="not-found">
-          <div className="icon-not-found">
-            <NotFound />
-          </div>
+          <div className="icon-not-found"><NotFound /></div>
           <span>{noDataMessage}</span>
         </div>
       );
@@ -166,23 +167,50 @@ export default function Graph() {
     if (category === "Estadísticos") return renderStatisticalData();
 
     const chartData = chartDataState.results || chartDataState;
-
-    let selectedGraph = localStorage.getItem("selectedGraph");
+    const selectedGraph = localStorage.getItem("selectedGraph");
+    const typeCompanies = localStorage.getItem("typeCompanies");
 
     if (selectedGraph === "flujoDeCaja") return renderStatisticalData();
 
-    let typeCompanies = localStorage.getItem("typeCompanies");
-
-    if (selectedGraph == "ventasVScompras" || typeCompanies == "Multiple") {
-      return (
-        <BarChartMixedComponent
-          data={chartData}
-          dateRange={chartDataState.dateRange}
-          dateTypeRange={typeRange}
-        />
-      );
+    // --- LÓGICA PARA MULTIEMPRESA O COMPARATIVAS (MIXED) ---
+    if (selectedGraph === "ventasVScompras" || typeCompanies === "Multiple") {
+      switch (currentGraphType) {
+        case "Barra":
+          return (
+            <BarChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+        case "Torta":
+          return (
+            <PieChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+        case "Línea":
+          return (
+            <LineChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+        default:
+          return (
+            <BarChartMixedComponent
+              data={chartData}
+              dateRange={chartDataState.dateRange}
+              dateTypeRange={typeRange}
+            />
+          );
+      }
     }
 
+    // --- LÓGICA PARA EMPRESA ÚNICA (ESTÁNDAR) ---
     switch (currentGraphType) {
       case "Barra":
         return (
@@ -211,14 +239,13 @@ export default function Graph() {
       default:
         return (
           <div className="not-found">
-            <div className="icon-not-found">
-              <NotFound />
-            </div>
+            <div className="icon-not-found"><NotFound /></div>
             <span>No se ha seleccionado ningún tipo de gráfico válido.</span>
           </div>
         );
     }
   };
+
 
   const renderStatisticalData = () => {
     if (!chartDataState || Object.keys(chartDataState).length === 0) {
@@ -238,41 +265,71 @@ export default function Graph() {
     const handleSaveSelection = () => {
       setConfirmedCompany(selectedCompany);
       setModalVisible(false);
-      console.log("Empresa confirmada:", selectedCompany);
     };
 
     const getKPIValue = (value) => {
       const parse = (v) => {
-        if (v === null || v === undefined) return 0;
+        if (v === null || v === undefined || v === "") return 0;
         if (typeof v === "number") return v;
-        return (
-          parseFloat(v.toString().replace(/\./g, "").replace(/,/g, ".")) || 0
-        );
+
+        let str = v.toString().trim().replace(/[^\d.,-]/g, "");
+
+        if (str.includes(",") && str.includes(".")) {
+          str = str.replace(/\./g, "").replace(",", ".");
+        } else if (str.includes(",")) {
+          str = str.replace(",", ".");
+        } else if (str.includes(".")) {
+          const parts = str.split(".");
+          if (parts.length > 2) {
+            str = str.replace(/\./g, "");
+          } else {
+            if (parts[1].length !== 2) {
+              str = str.replace(/\./g, "");
+            }
+          }
+        }
+
+        const n = parseFloat(str);
+        return isNaN(n) ? 0 : n;
       };
 
-      // KPIs donde se permite mostrar Total Unidades
+      const format = (n) => {
+        return new Intl.NumberFormat('es-ES', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(n);
+      };
+
       const showTotalUnidadesKPIs = [
         "Productos más vendidos USD",
         "Productos más vendidos UND",
         "Laboratorio con más Ventas USD",
         "Laboratorio con más Ventas UND",
+        "ProductosTOP"
       ];
 
+      // Caso: UNIDADES
       if (criterio === "unidades") {
+        const main = parse(value.unidades_vendidas ?? value.total_unidades ?? 0);
+        const secondary = parse(value.total_ventas ?? value.totusd ?? 0);
+
         return {
-          main: parse(value.unidades_vendidas ?? value.total_unidades ?? 0),
-          secondary: parse(value.total_ventas ?? 0),
+          main: format(main),
+          secondary: format(secondary)
         };
       }
 
-      // Si no es KPI de productos/laboratorios, no devolver total_unidades
-      const secondaryValue = showTotalUnidadesKPIs.includes(nameGraph)
+      // Caso: MONTO
+      const shouldShowSecondary = showTotalUnidadesKPIs.some(kpi => nameGraph.includes(kpi));
+
+      const main = parse(value.total_ventas ?? value.totusd ?? 0);
+      const secondary = shouldShowSecondary
         ? parse(value.total_unidades ?? value.unidades_vendidas ?? 0)
         : 0;
 
       return {
-        main: parse(value.total_ventas ?? 0),
-        secondary: secondaryValue,
+        main: format(main),
+        secondary: format(secondary)
       };
     };
 
@@ -645,11 +702,8 @@ export default function Graph() {
                       nameGraph !== "Flujo de Caja" && (
                         <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
                           {criterio === "unidades"
-                            ? `${main.toLocaleString("es-ES")} UND`
-                            : `$${main.toLocaleString("es-ES", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}`}
+                            ? `${main} UND`
+                            : `$${main}`}
                         </div>
                       )}
                   </div>
