@@ -10,6 +10,16 @@ export const loginUser = async (cliente) => {
   }
 }
 
+export const customGraph = async (cliente) => {
+  try {
+    const response = await instance.put('/clients/custom-graph', cliente)
+    const data = response.data
+    return data
+  } catch (error) {
+    throw error
+  }
+}
+
 export const verifyToken = async (token) => {
   try {
     const response = await instance.post('/clients/verify-token', {}, {

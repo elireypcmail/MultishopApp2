@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { defaultChartTypes } from '@conf/defaultChartTypes'
+import { updateGraphTypePreference } from '@g/changeGraph'
 import {
   CloseModal,
   BarGraph,
@@ -10,6 +11,7 @@ import {
 const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
   const [currentSelectedGraphType, setCurrentSelectedGraphType] = useState('')
   const [closing, setClosing] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const graphTypes = [
     { name: 'Barra', icon: <BarGraph /> },
@@ -27,7 +29,9 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
     }
   }, [selectedGraphName])
 
-  const handleItemClick = (graphType) => { setCurrentSelectedGraphType(graphType.name) }
+  const handleItemClick = (graphType) => { 
+    setCurrentSelectedGraphType(graphType.name) 
+  }
 
   const handleClose = () => {
     setClosing(true)
@@ -35,10 +39,26 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
     setClosing(false)
   }
 
-  const handleSave = () => {
-    onSave(currentSelectedGraphType)
-    localStorage.setItem('selectedGraphType', currentSelectedGraphType)
-    handleClose()
+  const handleSave = async () => {
+    setLoading(true)
+    try {
+      let userId = localStorage.getItem('idUser') || null
+
+      await updateGraphTypePreference({ 
+        userId: userId, 
+        type_graph: currentSelectedGraphType 
+      })
+
+      localStorage.setItem('selectedGraphType', currentSelectedGraphType)
+      onSave(currentSelectedGraphType)
+      
+      handleClose()
+    } catch (error) {
+      console.error('Error updating default graph:', error)
+      alert('Could not save preference to the server.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -47,7 +67,7 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
         <span className="close-button" onClick={handleClose}>
           <CloseModal />
         </span>
-        <h2 className="ti-graph">Tipos de Gráficos</h2>
+        <h2 className="ti-graph">Chart Types</h2>
         <ul className="li">
           {graphTypes.map((graphType, index) => (
             <li
@@ -56,18 +76,19 @@ const GraphTypeModal = ({ onClose, onSave, selectedGraphName }) => {
               onClick={() => handleItemClick(graphType)}
             >
               <div className="list">
-                <div className="graph-icon">
-                  {graphType.icon}
-                </div>
-                <div className="gra-li">
-                  {graphType.name}
-                </div>
+                <div className="graph-icon">{graphType.icon}</div>
+                <div className="gra-li">{graphType.name}</div>
               </div>
             </li>
           ))}
         </ul>
         <div className="save-button-container">
-          <button onClick={handleSave} disabled={!currentSelectedGraphType}>Guardar</button>
+          <button 
+            onClick={handleSave} 
+            disabled={!currentSelectedGraphType || loading}
+          >
+            {loading ? 'Saving...' : 'Save'}
+          </button>
         </div>
       </div>
     </div>
